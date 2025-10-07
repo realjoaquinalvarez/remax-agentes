@@ -37,7 +37,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { ArrowLeft, TrendingUp, Instagram, Facebook } from "lucide-react"
+import { ArrowLeft, Instagram, Facebook, BarChart3, Share2, TrendingUp as TrendingUpIcon } from "lucide-react"
 import { getAgentById } from "@/lib/data/mock-agents"
 
 export default function AgentDetailPage() {
@@ -106,12 +106,15 @@ export default function AgentDetailPage() {
     },
   } satisfies ChartConfig
 
-  // Generate alcance history
-  const contentHistory = performanceHistory.map((month) => ({
-    month: month.month,
-    publicaciones: month.publicaciones || 0,
-    alcance: Math.floor((month.publicaciones || 0) * 1500 + Math.random() * 3000),
-  }))
+  // Generate alcance history (memoized to prevent regeneration on unrelated state changes)
+  const contentHistory = useMemo(() =>
+    performanceHistory.map((month) => ({
+      month: month.month,
+      publicaciones: month.publicaciones || 0,
+      alcance: Math.floor((month.publicaciones || 0) * 1500 + Math.random() * 3000),
+    })),
+    [performanceHistory]
+  )
 
   return (
     <SidebarProvider
@@ -159,61 +162,70 @@ export default function AgentDetailPage() {
 
           {/* Tabs */}
           <Tabs defaultValue="resumen" className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-3">
-              <TabsTrigger value="resumen">Resumen</TabsTrigger>
-              <TabsTrigger value="redes">Redes Sociales</TabsTrigger>
-              <TabsTrigger value="ventas">Ventas</TabsTrigger>
+            <TabsList className="inline-flex h-10 items-center justify-start gap-1 rounded-lg bg-muted p-1">
+              <TabsTrigger value="resumen" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
+                <BarChart3 className="size-4" />
+                Resumen
+              </TabsTrigger>
+              <TabsTrigger value="redes" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
+                <Share2 className="size-4" />
+                Redes Sociales
+              </TabsTrigger>
+              <TabsTrigger value="ventas" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
+                <TrendingUpIcon className="size-4" />
+                Ventas
+              </TabsTrigger>
             </TabsList>
 
             {/* Resumen Tab */}
             <TabsContent value="resumen" className="mt-6 space-y-6">
               {/* Key Metrics */}
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="border-border/50 shadow-sm">
-                  <CardHeader className="pb-3">
-                    <CardDescription className="text-xs font-medium uppercase tracking-wide">
+                  <CardContent className="px-3.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
                       Contactados
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold tracking-tight">{salesMetrics.contacted}</div>
-                    <p className="mt-1 text-xs text-muted-foreground">este mes</p>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight">{salesMetrics.contacted}</span>
+                      <span className="text-xs text-muted-foreground">este mes</span>
+                    </div>
                   </CardContent>
                 </Card>
 
                 <Card className="border-border/50 shadow-sm">
-                  <CardHeader className="pb-3">
-                    <CardDescription className="text-xs font-medium uppercase tracking-wide">
+                  <CardContent className="px-3.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
                       Activos
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold tracking-tight">{salesMetrics.active}</div>
-                    <p className="mt-1 text-xs text-muted-foreground">en proceso</p>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight">{salesMetrics.active}</span>
+                      <span className="text-xs text-muted-foreground">en proceso</span>
+                    </div>
                   </CardContent>
                 </Card>
 
                 <Card className="border-border/50 shadow-sm">
-                  <CardHeader className="pb-3">
-                    <CardDescription className="text-xs font-medium uppercase tracking-wide">
+                  <CardContent className="px-3.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
                       Cerrados
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold tracking-tight">{salesMetrics.closed}</div>
-                    <p className="mt-1 text-xs text-muted-foreground">este mes</p>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight">{salesMetrics.closed}</span>
+                      <span className="text-xs text-muted-foreground">este mes</span>
+                    </div>
                   </CardContent>
                 </Card>
 
                 <Card className="border-border/50 shadow-sm">
-                  <CardHeader className="pb-3">
-                    <CardDescription className="text-xs font-medium uppercase tracking-wide">
+                  <CardContent className="px-3.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
                       Publicaciones
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold tracking-tight">{agent.monthlyMetrics.posts}</div>
-                    <p className="mt-1 text-xs text-muted-foreground">este mes</p>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight">{agent.monthlyMetrics.posts}</span>
+                      <span className="text-xs text-muted-foreground">este mes</span>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
