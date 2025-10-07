@@ -57,8 +57,9 @@ export async function GET(request: NextRequest) {
         console.log(`   ID: ${page.id}`);
         console.log(`   Access Token: ${page.access_token.substring(0, 20)}...`);
       }
-    } catch (error: any) {
-      console.log('❌ Error obteniendo páginas:', error.response?.data || error.message);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.log('❌ Error obteniendo páginas:', errorMessage);
     }
 
     // TODO: Save user data and access token to database
@@ -66,8 +67,9 @@ export async function GET(request: NextRequest) {
     // Redirect to dashboard with success
     return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/dashboard?success=connected`);
 
-  } catch (error: any) {
-    console.error('Error al obtener token:', error.response?.data || error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error al obtener token:', errorMessage);
     return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/dashboard?error=token_failed`);
   }
 }

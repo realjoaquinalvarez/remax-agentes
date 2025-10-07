@@ -32,8 +32,9 @@ export async function getFacebookPageInsights(
     );
 
     return response.data;
-  } catch (error: any) {
-    console.error('Error fetching Facebook page insights:', error.response?.data || error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error fetching Facebook page insights:', errorMessage);
     throw error;
   }
 }
@@ -69,8 +70,9 @@ export async function getFacebookPageInfo(
     );
 
     return response.data;
-  } catch (error: any) {
-    console.error('Error fetching Facebook page info:', error.response?.data || error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error fetching Facebook page info:', errorMessage);
     throw error;
   }
 }
@@ -109,8 +111,9 @@ export async function getFacebookPagePosts(
     );
 
     return response.data;
-  } catch (error: any) {
-    console.error('Error fetching Facebook page posts:', error.response?.data || error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error fetching Facebook page posts:', errorMessage);
     throw error;
   }
 }
@@ -129,7 +132,7 @@ export async function getFacebookPageEngagement(
   until?: string
 ) {
   try {
-    const params: any = {
+    const params: Record<string, string> = {
       metric: [
         'page_post_engagements',
         'page_engaged_users',
@@ -149,8 +152,9 @@ export async function getFacebookPageEngagement(
     );
 
     return response.data;
-  } catch (error: any) {
-    console.error('Error fetching Facebook page engagement:', error.response?.data || error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error fetching Facebook page engagement:', errorMessage);
     throw error;
   }
 }
@@ -174,8 +178,9 @@ export async function getLongLivedToken(shortLivedToken: string) {
     );
 
     return response.data;
-  } catch (error: any) {
-    console.error('Error exchanging token:', error.response?.data || error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error exchanging token:', errorMessage);
     throw error;
   }
 }

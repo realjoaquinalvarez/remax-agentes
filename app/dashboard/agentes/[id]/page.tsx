@@ -57,6 +57,63 @@ export default function AgentDetailPage() {
   const [contenidoMetric, setContenidoMetric] = useState<"publicaciones" | "alcance">("publicaciones")
   const [timeFilter, setTimeFilter] = useState<"dia" | "semana" | "mes" | "año">("mes")
 
+  // Generate performance data based on time filter
+  const performanceHistory = useMemo(() => {
+    if (!agent) return []
+
+    const basePerformanceHistory = agent.performanceHistory || []
+
+    if (basePerformanceHistory.length === 0) return []
+
+    const baseData = basePerformanceHistory[basePerformanceHistory.length - 1]
+
+    if (timeFilter === "dia") {
+      // Last 24 hours (hourly data)
+      return Array.from({ length: 24 }, (_, i) => ({
+        month: `${i}h`,
+        contactados: Math.floor((baseData.contactados || 0) / 30 + Math.random() * 5),
+        activos: Math.floor((baseData.activos || 0) / 30 + Math.random() * 2),
+        cerrados: Math.floor((baseData.cerrados || 0) / 30 + Math.random() * 2),
+        publicaciones: Math.floor((baseData.publicaciones || 0) / 30 + Math.random() * 2),
+      }))
+    } else if (timeFilter === "semana") {
+      // Last 4 weeks (weekly data)
+      return Array.from({ length: 4 }, (_, i) => ({
+        month: `S${i + 1}`,
+        contactados: Math.floor((baseData.contactados || 0) / 4 + Math.random() * 10),
+        activos: Math.floor((baseData.activos || 0) / 4 + Math.random() * 5),
+        cerrados: Math.floor((baseData.cerrados || 0) / 4 + Math.random() * 3),
+        publicaciones: Math.floor((baseData.publicaciones || 0) / 4 + Math.random() * 3),
+      }))
+    } else if (timeFilter === "año") {
+      // Last 12 months
+      const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+      return months.map((month, i) => {
+        const isCurrentMonth = i === months.length - 1
+        return {
+          month,
+          contactados: isCurrentMonth ? (baseData.contactados || 0) : Math.floor((baseData.contactados || 0) * (0.8 + Math.random() * 0.4)),
+          activos: isCurrentMonth ? (baseData.activos || 0) : Math.floor((baseData.activos || 0) * (0.8 + Math.random() * 0.4)),
+          cerrados: isCurrentMonth ? (baseData.cerrados || 0) : Math.floor((baseData.cerrados || 0) * (0.8 + Math.random() * 0.4)),
+          publicaciones: isCurrentMonth ? (baseData.publicaciones || 0) : Math.floor((baseData.publicaciones || 0) * (0.8 + Math.random() * 0.4)),
+        }
+      })
+    }
+
+    // Default: mes (last 6 months)
+    return basePerformanceHistory
+  }, [agent, timeFilter])
+
+  // Generate alcance history (memoized to prevent regeneration on unrelated state changes)
+  const contentHistory = useMemo(() =>
+    performanceHistory.map((month) => ({
+      month: month.month,
+      publicaciones: month.publicaciones || 0,
+      alcance: Math.floor((month.publicaciones || 0) * 1500 + Math.random() * 3000),
+    })),
+    [performanceHistory]
+  )
+
   if (!agent) {
     return (
       <SidebarProvider>
@@ -149,51 +206,6 @@ export default function AgentDetailPage() {
     return labels[timeFilter]
   }
 
-  const basePerformanceHistory = agent.performanceHistory || []
-
-  // Generate performance data based on time filter
-  const performanceHistory = useMemo(() => {
-    if (basePerformanceHistory.length === 0) return []
-
-    const baseData = basePerformanceHistory[basePerformanceHistory.length - 1]
-
-    if (timeFilter === "dia") {
-      // Last 24 hours (hourly data)
-      return Array.from({ length: 24 }, (_, i) => ({
-        month: `${i}h`,
-        contactados: Math.floor((baseData.contactados || 0) / 30 + Math.random() * 5),
-        activos: Math.floor((baseData.activos || 0) / 30 + Math.random() * 2),
-        cerrados: Math.floor((baseData.cerrados || 0) / 30 + Math.random() * 2),
-        publicaciones: Math.floor((baseData.publicaciones || 0) / 30 + Math.random() * 2),
-      }))
-    } else if (timeFilter === "semana") {
-      // Last 4 weeks (weekly data)
-      return Array.from({ length: 4 }, (_, i) => ({
-        month: `S${i + 1}`,
-        contactados: Math.floor((baseData.contactados || 0) / 4 + Math.random() * 10),
-        activos: Math.floor((baseData.activos || 0) / 4 + Math.random() * 5),
-        cerrados: Math.floor((baseData.cerrados || 0) / 4 + Math.random() * 3),
-        publicaciones: Math.floor((baseData.publicaciones || 0) / 4 + Math.random() * 3),
-      }))
-    } else if (timeFilter === "año") {
-      // Last 12 months
-      const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-      return months.map((month, i) => {
-        const isCurrentMonth = i === months.length - 1
-        return {
-          month,
-          contactados: isCurrentMonth ? (baseData.contactados || 0) : Math.floor((baseData.contactados || 0) * (0.8 + Math.random() * 0.4)),
-          activos: isCurrentMonth ? (baseData.activos || 0) : Math.floor((baseData.activos || 0) * (0.8 + Math.random() * 0.4)),
-          cerrados: isCurrentMonth ? (baseData.cerrados || 0) : Math.floor((baseData.cerrados || 0) * (0.8 + Math.random() * 0.4)),
-          publicaciones: isCurrentMonth ? (baseData.publicaciones || 0) : Math.floor((baseData.publicaciones || 0) * (0.8 + Math.random() * 0.4)),
-        }
-      })
-    }
-
-    // Default: mes (last 6 months)
-    return basePerformanceHistory
-  }, [basePerformanceHistory, timeFilter])
-
   const clientesChartConfig = {
     contactados: {
       label: "Contactados",
@@ -219,16 +231,6 @@ export default function AgentDetailPage() {
       color: "#0b49e9",
     },
   } satisfies ChartConfig
-
-  // Generate alcance history (memoized to prevent regeneration on unrelated state changes)
-  const contentHistory = useMemo(() =>
-    performanceHistory.map((month) => ({
-      month: month.month,
-      publicaciones: month.publicaciones || 0,
-      alcance: Math.floor((month.publicaciones || 0) * 1500 + Math.random() * 3000),
-    })),
-    [performanceHistory]
-  )
 
   return (
     <SidebarProvider
@@ -317,7 +319,7 @@ export default function AgentDetailPage() {
                 </TabsTrigger>
               </TabsList>
 
-              <Select value={timeFilter} onValueChange={(value: any) => setTimeFilter(value)}>
+              <Select value={timeFilter} onValueChange={(value) => setTimeFilter(value as "dia" | "semana" | "mes" | "año")}>
                 <SelectTrigger className="w-[140px] h-9 border-border/50 shadow-sm">
                   <SelectValue />
                 </SelectTrigger>
@@ -398,7 +400,7 @@ export default function AgentDetailPage() {
                         </div>
                         <Select
                           value={clientesMetric}
-                          onValueChange={(value: any) => setClientesMetric(value)}
+                          onValueChange={(value) => setClientesMetric(value as "contactados" | "activos" | "cerrados")}
                           key="clientes-metric-select"
                         >
                           <SelectTrigger className="w-[140px] text-xs">
@@ -450,7 +452,7 @@ export default function AgentDetailPage() {
                         </div>
                         <Select
                           value={contenidoMetric}
-                          onValueChange={(value: any) => setContenidoMetric(value)}
+                          onValueChange={(value) => setContenidoMetric(value as "publicaciones" | "alcance")}
                           key="contenido-metric-select"
                         >
                           <SelectTrigger className="w-[140px] text-xs">

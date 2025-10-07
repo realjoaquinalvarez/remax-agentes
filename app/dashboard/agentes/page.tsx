@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import {
@@ -20,8 +19,6 @@ import { mockAgents } from "@/lib/data/mock-agents"
 import { AgentsTable } from "@/components/agents-table"
 
 export default function AgentsPage() {
-  const router = useRouter()
-
   return (
     <SidebarProvider
       style={

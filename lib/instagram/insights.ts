@@ -30,8 +30,9 @@ export async function getInstagramInsights(
     );
 
     return response.data;
-  } catch (error: any) {
-    console.error('Error fetching Instagram insights:', error.response?.data || error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error fetching Instagram insights:', errorMessage);
     throw error;
   }
 }
@@ -66,8 +67,9 @@ export async function getInstagramAccountInfo(
     );
 
     return response.data;
-  } catch (error: any) {
-    console.error('Error fetching Instagram account info:', error.response?.data || error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error fetching Instagram account info:', errorMessage);
     throw error;
   }
 }
@@ -106,8 +108,9 @@ export async function getInstagramMedia(
     );
 
     return response.data;
-  } catch (error: any) {
-    console.error('Error fetching Instagram media:', error.response?.data || error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error fetching Instagram media:', errorMessage);
     throw error;
   }
 }
@@ -131,8 +134,9 @@ export async function getLongLivedToken(shortLivedToken: string) {
     );
 
     return response.data;
-  } catch (error: any) {
-    console.error('Error exchanging token:', error.response?.data || error.message);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Error exchanging token:', errorMessage);
     throw error;
   }
 }

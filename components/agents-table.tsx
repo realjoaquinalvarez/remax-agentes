@@ -427,7 +427,7 @@ export function AgentsTable({ agents, type }: AgentsTableProps) {
           className="max-w-sm border-border/50 shadow-sm"
         />
 
-        <Select value={timeFilter} onValueChange={(value: any) => setTimeFilter(value)}>
+        <Select value={timeFilter} onValueChange={(value) => setTimeFilter(value as "dia" | "semana" | "mes" | "año")}>
           <SelectTrigger className="ml-auto w-[140px] h-9 border-border/50 shadow-sm">
             <SelectValue />
           </SelectTrigger>

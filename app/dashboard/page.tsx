@@ -333,7 +333,7 @@ export default function DashboardPage() {
                       Clientes conseguidos {getTimeLabel()}
                     </CardDescription>
                   </div>
-                  <Select value={topPerformersFilter} onValueChange={(value: any) => setTopPerformersFilter(value)}>
+                  <Select value={topPerformersFilter} onValueChange={(value) => setTopPerformersFilter(value as "dia" | "semana" | "mes" | "año")}>
                     <SelectTrigger className="h-8 w-[110px] text-xs">
                       <SelectValue />
                     </SelectTrigger>

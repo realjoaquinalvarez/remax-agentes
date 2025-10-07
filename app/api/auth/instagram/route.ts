@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const appId = process.env.NEXT_PUBLIC_META_APP_ID;
   const redirectUri = `${process.env.NEXTAUTH_URL}/api/auth/instagram/callback`;
 
