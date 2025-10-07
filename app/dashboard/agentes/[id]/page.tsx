@@ -16,10 +16,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Select,
@@ -28,17 +26,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import {
   ChartConfig,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { ArrowLeft, Instagram, Facebook, BarChart3, Share2, TrendingUp as TrendingUpIcon } from "lucide-react"
+import { ChevronLeft, Instagram, Facebook, BarChart3, Share2, TrendingUp as TrendingUpIcon, User, ExternalLink } from "lucide-react"
 import { getAgentById } from "@/lib/data/mock-agents"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 export default function AgentDetailPage() {
   const params = useParams()
@@ -55,7 +59,26 @@ export default function AgentDetailPage() {
       <SidebarProvider>
         <AppSidebar variant="inset" />
         <SidebarInset>
-          <SiteHeader title="Agente no encontrado" />
+          <SiteHeader
+            breadcrumb={
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink
+                      onClick={() => router.push("/dashboard")}
+                      className="cursor-pointer"
+                    >
+                      Dashboard
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Agente no encontrado</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            }
+          />
           <div className="flex flex-1 items-center justify-center p-6">
             <div className="text-center">
               <h2 className="text-2xl font-bold">Agente no encontrado</h2>
@@ -215,38 +238,59 @@ export default function AgentDetailPage() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader title="">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/dashboard")}
-            className="gap-2"
-          >
-            <ArrowLeft className="size-4" />
-            Volver
-          </Button>
-        </SiteHeader>
+        <SiteHeader
+          breadcrumb={
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    onClick={() => router.push("/dashboard")}
+                    className="cursor-pointer"
+                  >
+                    Dashboard
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{agent.name}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          }
+          actions={
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => router.push("/dashboard")}
+              className="gap-1.5 rounded-full shadow-sm bg-primary hover:bg-primary/90"
+            >
+              <ChevronLeft className="size-4" />
+              Volver
+            </Button>
+          }
+        />
 
         <div className="flex flex-1 flex-col gap-6 p-6 lg:p-8">
           {/* Agent Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                <span className="text-xl font-bold text-primary">
-                  {agent.name.split(" ").map(n => n[0]).join("")}
-                </span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">{agent.name}</h1>
-                <p className="mt-1 text-sm text-muted-foreground">{agent.email}</p>
-              </div>
+          <div className="flex items-center gap-4">
+            <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/10">
+              <User className="size-8 text-primary" />
             </div>
-            <Badge variant={agent.status === "active" ? "default" : "secondary"}>
-              {agent.status === "active" ? "Activo" : agent.status}
-            </Badge>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight">{agent.name}</h1>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-6 text-muted-foreground hover:text-foreground"
+                  onClick={() => window.open(`https://wa.me/${agent.phone?.replace(/\D/g, '')}`, '_blank')}
+                >
+                  <ExternalLink className="size-4" />
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">{agent.email}</p>
+            </div>
           </div>
-
-          <Separator />
 
           {/* Tabs */}
           <Tabs defaultValue="resumen" className="w-full">
@@ -267,7 +311,7 @@ export default function AgentDetailPage() {
               </TabsList>
 
               <Select value={timeFilter} onValueChange={(value: any) => setTimeFilter(value)}>
-                <SelectTrigger className="w-[140px] h-9">
+                <SelectTrigger className="w-[140px] h-9 border-border/50 shadow-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -442,111 +486,341 @@ export default function AgentDetailPage() {
             </TabsContent>
 
             {/* Redes Sociales Tab */}
-            <TabsContent value="redes" className="mt-6 space-y-4">
-              {agent.socialMediaBreakdown?.map((social) => (
-                <Card key={social.platform} className="border-border/50 shadow-sm">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      {social.platform === "instagram" ? (
-                        <Instagram className="size-5 text-primary" />
-                      ) : (
-                        <Facebook className="size-5 text-primary" />
-                      )}
-                      <CardTitle className="text-base font-semibold capitalize">
-                        {social.platform}
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-4 md:grid-cols-4">
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Seguidores
-                        </p>
-                        <p className="mt-1 text-2xl font-bold">{social.followers.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Posts
-                        </p>
-                        <p className="mt-1 text-2xl font-bold">{social.posts}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Alcance
-                        </p>
-                        <p className="mt-1 text-2xl font-bold">{social.reach.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Engagement
-                        </p>
-                        <p className="mt-1 text-2xl font-bold">{social.engagementRate}%</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )) || (
+            <TabsContent value="redes" className="mt-6 space-y-6">
+              {/* Social Media Metrics */}
+              <div className="grid gap-3 md:grid-cols-4">
                 <Card className="border-border/50 shadow-sm">
-                  <CardContent className="py-12 text-center text-sm text-muted-foreground">
-                    No hay datos de redes sociales disponibles
+                  <CardContent className="px-3.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
+                      Seguidores Totales
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight">{agent.monthlyMetrics.followers.toLocaleString()}</span>
+                      <span className="text-xs text-emerald-600 font-medium">+{agent.monthlyMetrics.followerGrowth}%</span>
+                    </div>
                   </CardContent>
                 </Card>
+
+                <Card className="border-border/50 shadow-sm">
+                  <CardContent className="px-3.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
+                      Posts
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight">{agent.monthlyMetrics.posts}</span>
+                      <span className="text-xs text-muted-foreground">{getTimeLabel()}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/50 shadow-sm">
+                  <CardContent className="px-3.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
+                      Alcance
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight">{agent.monthlyMetrics.reach.toLocaleString()}</span>
+                      <span className="text-xs text-muted-foreground">{getTimeLabel()}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/50 shadow-sm">
+                  <CardContent className="px-3.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
+                      Engagement
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight">{agent.monthlyMetrics.engagementRate}%</span>
+                      <span className="text-xs text-muted-foreground">tasa</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Charts */}
+              <div className="grid gap-4 lg:grid-cols-2">
+                {/* Followers Growth Chart */}
+                <Card className="border-border/50 shadow-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base font-semibold">Crecimiento de Seguidores</CardTitle>
+                    <CardDescription className="text-xs">
+                      Evolución {getChartPeriodLabel()}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="px-3 pt-0 pb-6">
+                    <ChartContainer
+                      config={{
+                        seguidores: {
+                          label: "Seguidores",
+                          color: "#0b49e9",
+                        },
+                      }}
+                      className="h-[240px] w-full"
+                    >
+                      <LineChart
+                        accessibilityLayer
+                        data={performanceHistory.map((month, i) => ({
+                          month: month.month,
+                          seguidores: Math.floor(agent.monthlyMetrics.followers * (0.85 + i * 0.03)),
+                        }))}
+                        margin={{ left: 12, right: 12, top: 16, bottom: 16 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
+                        <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
+                        <YAxis tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} width={40} />
+                        <ChartTooltip cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }} content={<ChartTooltipContent />} />
+                        <Line
+                          dataKey="seguidores"
+                          type="monotone"
+                          stroke="var(--color-seguidores)"
+                          strokeWidth={2.5}
+                          dot={{ fill: "var(--color-seguidores)", strokeWidth: 2, r: 4, stroke: "hsl(var(--background))" }}
+                        />
+                      </LineChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+
+                {/* Engagement & Reach Chart */}
+                <Card className="border-border/50 shadow-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base font-semibold">Alcance y Engagement</CardTitle>
+                    <CardDescription className="text-xs">
+                      Evolución {getChartPeriodLabel()}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="px-3 pt-0 pb-6">
+                    <ChartContainer
+                      config={{
+                        alcance: {
+                          label: "Alcance",
+                          color: "#0b49e9",
+                        },
+                        engagement: {
+                          label: "Engagement",
+                          color: "#7c3aed",
+                        },
+                      }}
+                      className="h-[240px] w-full"
+                    >
+                      <BarChart
+                        accessibilityLayer
+                        data={performanceHistory.map((month) => ({
+                          month: month.month,
+                          alcance: Math.floor((month.publicaciones || 0) * 1200 + Math.random() * 2000),
+                          engagement: Math.floor(150 + Math.random() * 100),
+                        }))}
+                        margin={{ left: 12, right: 12, top: 16, bottom: 16 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
+                        <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
+                        <YAxis tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} width={40} />
+                        <ChartTooltip cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }} content={<ChartTooltipContent />} />
+                        <Bar dataKey="alcance" fill="var(--color-alcance)" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Social Media Breakdown */}
+              {agent.socialMediaBreakdown && agent.socialMediaBreakdown.length > 0 && (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {agent.socialMediaBreakdown.map((social) => (
+                    <Card key={social.platform} className="border-border/50 shadow-sm">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center gap-2">
+                          {social.platform === "instagram" ? (
+                            <Instagram className="size-5 text-primary" />
+                          ) : (
+                            <Facebook className="size-5 text-primary" />
+                          )}
+                          <CardTitle className="text-base font-semibold capitalize">
+                            {social.platform}
+                          </CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid gap-3 grid-cols-2">
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Seguidores
+                            </p>
+                            <p className="mt-1 text-xl font-bold">{social.followers.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Posts
+                            </p>
+                            <p className="mt-1 text-xl font-bold">{social.posts}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Alcance
+                            </p>
+                            <p className="mt-1 text-xl font-bold">{social.reach.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Engagement
+                            </p>
+                            <p className="mt-1 text-xl font-bold">{social.engagementRate}%</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               )}
             </TabsContent>
 
             {/* Ventas Tab */}
-            <TabsContent value="ventas" className="mt-6 space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+            <TabsContent value="ventas" className="mt-6 space-y-6">
+              {/* Sales Metrics */}
+              <div className="grid gap-3 md:grid-cols-4">
                 <Card className="border-border/50 shadow-sm">
-                  <CardHeader className="pb-3">
-                    <CardDescription className="text-xs font-medium uppercase tracking-wide">
-                      Tasa de Conversión
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold tracking-tight">{salesMetrics.conversionRate}%</div>
-                    <Progress value={salesMetrics.conversionRate} className="mt-3 h-2" />
-                  </CardContent>
-                </Card>
-
-                <Card className="border-border/50 shadow-sm">
-                  <CardHeader className="pb-3">
-                    <CardDescription className="text-xs font-medium uppercase tracking-wide">
-                      Valor Promedio
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold tracking-tight">
-                      €{salesMetrics.avgDealValue.toLocaleString()}
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">por venta</p>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-border/50 shadow-sm">
-                  <CardHeader className="pb-3">
-                    <CardDescription className="text-xs font-medium uppercase tracking-wide">
+                  <CardContent className="px-3.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
                       Ingresos Totales
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold tracking-tight">
-                      €{salesMetrics.totalRevenue.toLocaleString()}
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground">{getTimeLabel()}</p>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight">₲{salesMetrics.totalRevenue.toLocaleString()}</span>
+                      <span className="text-xs text-muted-foreground">{getTimeLabel()}</span>
+                    </div>
                   </CardContent>
                 </Card>
 
                 <Card className="border-border/50 shadow-sm">
-                  <CardHeader className="pb-3">
-                    <CardDescription className="text-xs font-medium uppercase tracking-wide">
+                  <CardContent className="px-3.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
+                      Valor Promedio
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight">₲{salesMetrics.avgDealValue.toLocaleString()}</span>
+                      <span className="text-xs text-muted-foreground">por venta</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/50 shadow-sm">
+                  <CardContent className="px-3.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
+                      Tasa de Conversión
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight">{salesMetrics.conversionRate}%</span>
+                      <Progress value={salesMetrics.conversionRate} className="h-1.5 w-16" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/50 shadow-sm">
+                  <CardContent className="px-3.5">
+                    <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
                       Propiedades
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold tracking-tight">{agent.totalProperties}</span>
+                      <span className="text-xs text-muted-foreground">gestionadas</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Charts */}
+              <div className="grid gap-4 lg:grid-cols-2">
+                {/* Revenue Chart */}
+                <Card className="border-border/50 shadow-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base font-semibold">Evolución de Ingresos</CardTitle>
+                    <CardDescription className="text-xs">
+                      Ingresos {getChartPeriodLabel()}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold tracking-tight">{agent.totalProperties}</div>
-                    <p className="mt-1 text-xs text-muted-foreground">gestionadas</p>
+                  <CardContent className="px-3 pt-0 pb-6">
+                    <ChartContainer
+                      config={{
+                        ingresos: {
+                          label: "Ingresos",
+                          color: "#0b49e9",
+                        },
+                      }}
+                      className="h-[240px] w-full"
+                    >
+                      <BarChart
+                        accessibilityLayer
+                        data={performanceHistory.map((month) => ({
+                          month: month.month,
+                          ingresos: Math.floor((month.cerrados || 0) * salesMetrics.avgDealValue * (0.9 + Math.random() * 0.2)),
+                        }))}
+                        margin={{ left: 12, right: 12, top: 16, bottom: 16 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
+                        <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tick={{ fontSize: 12 }}
+                          width={70}
+                          tickFormatter={(value) => `₲${value.toLocaleString()}`}
+                        />
+                        <ChartTooltip
+                          cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }}
+                          content={<ChartTooltipContent
+                            formatter={(value) => `₲${Number(value).toLocaleString()}`}
+                          />}
+                        />
+                        <Bar dataKey="ingresos" fill="var(--color-ingresos)" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+
+                {/* Conversion Funnel Chart */}
+                <Card className="border-border/50 shadow-sm">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base font-semibold">Embudo de Conversión</CardTitle>
+                    <CardDescription className="text-xs">
+                      Progreso {getTimeLabel()}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="px-3 pt-0 pb-6">
+                    <ChartContainer
+                      config={{
+                        contactados: {
+                          label: "Contactados",
+                          color: "#0b49e9",
+                        },
+                        activos: {
+                          label: "Activos",
+                          color: "#7c3aed",
+                        },
+                        cerrados: {
+                          label: "Cerrados",
+                          color: "#10b981",
+                        },
+                      }}
+                      className="h-[240px] w-full"
+                    >
+                      <BarChart
+                        accessibilityLayer
+                        data={[
+                          { stage: "Contactados", value: salesMetrics.contacted },
+                          { stage: "Activos", value: salesMetrics.active },
+                          { stage: "Cerrados", value: salesMetrics.closed },
+                        ]}
+                        margin={{ left: 12, right: 12, top: 16, bottom: 16 }}
+                        layout="vertical"
+                      >
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" opacity={0.5} />
+                        <XAxis type="number" tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
+                        <YAxis dataKey="stage" type="category" tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} width={80} />
+                        <ChartTooltip cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }} content={<ChartTooltipContent />} />
+                        <Bar dataKey="value" fill="#0b49e9" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ChartContainer>
                   </CardContent>
                 </Card>
               </div>

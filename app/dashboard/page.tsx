@@ -9,6 +9,12 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb"
+import {
   Card,
   CardContent,
   CardDescription,
@@ -88,7 +94,17 @@ export default function DashboardPage() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader title="Dashboard" />
+        <SiteHeader
+          breadcrumb={
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          }
+        />
         <div className="flex flex-1 flex-col gap-8 p-6 lg:p-8">
           {/* Main Metrics */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
