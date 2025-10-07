@@ -33,8 +33,10 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { ChevronLeft, Instagram, Facebook, BarChart3, Share2, TrendingUp as TrendingUpIcon, User, ExternalLink } from "lucide-react"
+import { ChevronLeft, Instagram, Facebook, BarChart3, Share2, TrendingUp as TrendingUpIcon, User, ExternalLink, Home } from "lucide-react"
 import { getAgentById } from "@/lib/data/mock-agents"
+import { getPropertiesByAgentId } from "@/lib/data/mock-properties"
+import { PropertiesTable } from "@/components/properties-table"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -49,6 +51,7 @@ export default function AgentDetailPage() {
   const router = useRouter()
   const agentId = params.id as string
   const agent = getAgentById(agentId)
+  const properties = getPropertiesByAgentId(agentId)
 
   const [clientesMetric, setClientesMetric] = useState<"contactados" | "activos" | "cerrados">("cerrados")
   const [contenidoMetric, setContenidoMetric] = useState<"publicaciones" | "alcance">("publicaciones")
@@ -307,6 +310,10 @@ export default function AgentDetailPage() {
                 <TabsTrigger value="ventas" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
                   <TrendingUpIcon className="size-4" />
                   Ventas
+                </TabsTrigger>
+                <TabsTrigger value="propiedades" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
+                  <Home className="size-4" />
+                  Propiedades
                 </TabsTrigger>
               </TabsList>
 
@@ -824,6 +831,23 @@ export default function AgentDetailPage() {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+
+            {/* Propiedades Tab */}
+            <TabsContent value="propiedades" className="mt-6">
+              {properties.length > 0 ? (
+                <PropertiesTable properties={properties} />
+              ) : (
+                <div className="flex h-[400px] items-center justify-center">
+                  <div className="text-center">
+                    <Home className="mx-auto size-12 text-muted-foreground/50" />
+                    <h3 className="mt-4 text-lg font-semibold">No hay propiedades</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Este agente no tiene propiedades asignadas
+                    </p>
+                  </div>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>
