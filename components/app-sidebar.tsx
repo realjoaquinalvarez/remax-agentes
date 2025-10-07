@@ -7,6 +7,7 @@ import {
   IconFolder,
   IconHelp,
   IconInnerShadowTop,
+  IconPlugConnected,
   IconSettings,
   IconUsers,
 } from "@tabler/icons-react"
@@ -40,6 +41,11 @@ const data = {
       title: "Agentes",
       url: "/dashboard/agentes",
       icon: IconUsers,
+    },
+    {
+      title: "Conexiones",
+      url: "/dashboard/conexiones",
+      icon: IconPlugConnected,
     },
     {
       title: "Propiedades",

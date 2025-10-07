@@ -4,11 +4,15 @@ export async function GET() {
   const appId = process.env.NEXT_PUBLIC_META_APP_ID;
   const redirectUri = `${process.env.NEXTAUTH_URL}/api/auth/instagram/callback`;
 
-  // Include pages permissions for admin/developer mode
+  // Include Facebook Pages and Instagram permissions
   const scope = [
     'public_profile',
-    'pages_show_list',
-    'pages_read_engagement'
+    'email',
+    'pages_read_engagement',
+    'pages_manage_engagement',
+    'read_insights',
+    'instagram_basic',
+    'instagram_manage_insights'
   ].join(',');
 
   // URL de autorización de Facebook
