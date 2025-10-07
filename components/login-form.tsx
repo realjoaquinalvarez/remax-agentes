@@ -17,31 +17,31 @@ export function LoginForm({
     <form className={cn("flex flex-col gap-6", className)} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <h1 className="text-2xl font-bold">Inicia sesión en tu cuenta</h1>
           <p className="text-muted-foreground text-sm text-balance">
-            Enter your email below to login to your account
+            Ingresa tu correo electrónico para iniciar sesión
           </p>
         </div>
         <Field>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
+          <Input id="email" type="email" placeholder="correo@ejemplo.com" required />
         </Field>
         <Field>
           <div className="flex items-center">
-            <FieldLabel htmlFor="password">Password</FieldLabel>
+            <FieldLabel htmlFor="password">Contraseña</FieldLabel>
             <a
               href="#"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
-              Forgot your password?
+              ¿Olvidaste tu contraseña?
             </a>
           </div>
           <Input id="password" type="password" required />
         </Field>
         <Field>
-          <Button type="submit">Login</Button>
+          <Button type="submit">Iniciar sesión</Button>
         </Field>
-        <FieldSeparator>Or continue with</FieldSeparator>
+        <FieldSeparator>O continuar con</FieldSeparator>
         <Field>
           <Button variant="outline" type="button">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -50,12 +50,12 @@ export function LoginForm({
                 fill="currentColor"
               />
             </svg>
-            Login with GitHub
+            Iniciar sesión con GitHub
           </Button>
           <FieldDescription className="text-center">
-            Don&apos;t have an account?{" "}
+            ¿No tienes una cuenta?{" "}
             <a href="#" className="underline underline-offset-4">
-              Sign up
+              Regístrate
             </a>
           </FieldDescription>
         </Field>

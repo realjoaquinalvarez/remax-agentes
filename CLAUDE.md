@@ -6,6 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Next.js 15.5.4 dashboard application for RE/MAX agents built with React 19, TypeScript, and Tailwind CSS v4. The project uses the App Router architecture with shadcn/ui components styled in the "New York" variant.
 
+## Language Requirements
+
+**IMPORTANT**: All user-facing content in the web application must be in **Spanish**. This includes:
+- UI labels and buttons
+- Form fields and placeholders
+- Navigation menus
+- Error messages and notifications
+- Page titles and descriptions
+- Any text visible to end users
+
+Code, comments, variable names, and technical documentation should remain in English for maintainability.
+
 ## Development Commands
 
 ```bash

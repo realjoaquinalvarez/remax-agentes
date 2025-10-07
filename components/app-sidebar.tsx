@@ -41,74 +41,74 @@ const data = {
   },
   navMain: [
     {
-      title: "Dashboard",
+      title: "Tablero",
       url: "#",
       icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
+      title: "Ciclo de vida",
       url: "#",
       icon: IconListDetails,
     },
     {
-      title: "Analytics",
+      title: "Análisis",
       url: "#",
       icon: IconChartBar,
     },
     {
-      title: "Projects",
+      title: "Proyectos",
       url: "#",
       icon: IconFolder,
     },
     {
-      title: "Team",
+      title: "Equipo",
       url: "#",
       icon: IconUsers,
     },
   ],
   navClouds: [
     {
-      title: "Capture",
+      title: "Captura",
       icon: IconCamera,
       isActive: true,
       url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "Propuestas activas",
           url: "#",
         },
         {
-          title: "Archived",
+          title: "Archivadas",
           url: "#",
         },
       ],
     },
     {
-      title: "Proposal",
+      title: "Propuesta",
       icon: IconFileDescription,
       url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "Propuestas activas",
           url: "#",
         },
         {
-          title: "Archived",
+          title: "Archivadas",
           url: "#",
         },
       ],
     },
     {
-      title: "Prompts",
+      title: "Indicaciones",
       icon: IconFileAi,
       url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "Propuestas activas",
           url: "#",
         },
         {
-          title: "Archived",
+          title: "Archivadas",
           url: "#",
         },
       ],
@@ -116,34 +116,34 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Settings",
+      title: "Configuración",
       url: "#",
       icon: IconSettings,
     },
     {
-      title: "Get Help",
+      title: "Obtener ayuda",
       url: "#",
       icon: IconHelp,
     },
     {
-      title: "Search",
+      title: "Buscar",
       url: "#",
       icon: IconSearch,
     },
   ],
   documents: [
     {
-      name: "Data Library",
+      name: "Biblioteca de datos",
       url: "#",
       icon: IconDatabase,
     },
     {
-      name: "Reports",
+      name: "Informes",
       url: "#",
       icon: IconReport,
     },
     {
-      name: "Word Assistant",
+      name: "Asistente de Word",
       url: "#",
       icon: IconFileWord,
     },
