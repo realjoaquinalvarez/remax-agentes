@@ -44,6 +44,7 @@ import { mockAgents } from "@/lib/data/mock-agents"
 
 export default function DashboardPage() {
   const router = useRouter()
+  const [topPerformersFilter, setTopPerformersFilter] = React.useState<"dia" | "semana" | "mes" | "año">("mes")
 
   // Calculate summary metrics
   const totalContacted = mockAgents.reduce((sum, agent) => {
@@ -61,6 +62,27 @@ export default function DashboardPage() {
   const totalReach = mockAgents.reduce((sum, agent) => {
     return sum + agent.monthlyMetrics.reach
   }, 0)
+
+  // Get time-filtered leads for top performers
+  const getFilteredLeads = (monthlyLeads: number) => {
+    const multipliers = {
+      dia: 0.033,
+      semana: 0.25,
+      mes: 1,
+      año: 12,
+    }
+    return Math.floor(monthlyLeads * multipliers[topPerformersFilter])
+  }
+
+  const getTimeLabel = () => {
+    const labels = {
+      dia: "hoy",
+      semana: "esta semana",
+      mes: "este mes",
+      año: "este año",
+    }
+    return labels[topPerformersFilter]
+  }
 
   // Chart data for monthly trends (simulated last 6 months)
   const chartData = [
@@ -287,10 +309,10 @@ export default function DashboardPage() {
                   <div>
                     <CardTitle className="text-base font-semibold">Mejores Agentes</CardTitle>
                     <CardDescription className="mt-1 text-xs">
-                      Clientes conseguidos este mes
+                      Clientes conseguidos {getTimeLabel()}
                     </CardDescription>
                   </div>
-                  <Select defaultValue="mes">
+                  <Select value={topPerformersFilter} onValueChange={(value: any) => setTopPerformersFilter(value)}>
                     <SelectTrigger className="h-8 w-[110px] text-xs">
                       <SelectValue />
                     </SelectTrigger>
@@ -305,11 +327,21 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-2 px-4 flex-1">
                 {mockAgents
-                  .sort((a, b) => (b.monthlyMetrics.leads || 0) - (a.monthlyMetrics.leads || 0))
+                  .map((agent) => ({
+                    ...agent,
+                    filteredLeads: getFilteredLeads(agent.monthlyMetrics.leads || 0)
+                  }))
+                  .sort((a, b) => b.filteredLeads - a.filteredLeads)
                   .slice(0, 4)
                   .map((agent) => {
-                    const maxLeads = mockAgents[0]?.monthlyMetrics.leads || 1
-                    const percentage = ((agent.monthlyMetrics.leads || 0) / maxLeads) * 100
+                    const sortedAgents = mockAgents
+                      .map((a) => ({
+                        ...a,
+                        filteredLeads: getFilteredLeads(a.monthlyMetrics.leads || 0)
+                      }))
+                      .sort((a, b) => b.filteredLeads - a.filteredLeads)
+                    const maxLeads = sortedAgents[0]?.filteredLeads || 1
+                    const percentage = (agent.filteredLeads / maxLeads) * 100
 
                     return (
                       <div
@@ -333,7 +365,7 @@ export default function DashboardPage() {
                           {/* Client Count */}
                           <div className="shrink-0 text-right">
                             <div className="text-lg font-semibold text-primary">
-                              {agent.monthlyMetrics.leads || 0}
+                              {agent.filteredLeads}
                             </div>
                             <div className="text-[9px] font-medium text-muted-foreground">
                               clientes
