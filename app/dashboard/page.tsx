@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import {
@@ -36,6 +37,8 @@ import { User } from "lucide-react"
 import { mockAgents } from "@/lib/data/mock-agents"
 
 export default function DashboardPage() {
+  const router = useRouter()
+
   // Calculate summary metrics
   const totalContacted = mockAgents.reduce((sum, agent) => {
     return sum + (agent.monthlyMetrics.leads || 0) * 3 // Simulating contacted clients (3x closed)
@@ -295,7 +298,8 @@ export default function DashboardPage() {
                     return (
                       <div
                         key={agent.id}
-                        className="group relative overflow-hidden rounded-xl border border-border/40 bg-card p-3 transition-all hover:border-primary/40 hover:shadow-sm"
+                        onClick={() => router.push(`/dashboard/agentes/${agent.id}`)}
+                        className="group relative overflow-hidden rounded-xl border border-border/40 bg-card p-3 transition-all hover:border-primary/40 hover:shadow-sm cursor-pointer"
                       >
                         <div className="flex items-center gap-3">
                           {/* User Icon */}

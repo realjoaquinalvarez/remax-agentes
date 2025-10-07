@@ -9,6 +9,33 @@ export interface PeriodMetrics {
   leads?: number
 }
 
+export interface SocialMediaMetrics {
+  platform: "instagram" | "facebook"
+  followers: number
+  posts: number
+  reach: number
+  impressions: number
+  engagementRate: number
+  totalEngagements: number
+}
+
+export interface SalesMetrics {
+  contacted: number
+  active: number
+  closed: number
+  conversionRate: number
+  avgDealValue: number
+  totalRevenue: number
+}
+
+export interface PerformanceData {
+  month: string
+  cerrados: number
+  contactados: number
+  activos: number
+  publicaciones?: number
+}
+
 export interface Agent {
   id: string
   name: string
@@ -23,4 +50,7 @@ export interface Agent {
   historicalMetrics: PeriodMetrics[]
   instagramHandle?: string
   facebookHandle?: string
+  socialMediaBreakdown?: SocialMediaMetrics[]
+  salesMetrics?: SalesMetrics
+  performanceHistory?: PerformanceData[]
 }
