@@ -46,8 +46,9 @@ export default function AgentDetailPage() {
   const agentId = params.id as string
   const agent = getAgentById(agentId)
 
-  const [clientesMetric, setClientesMetric] = useState<"contactados" | "activos" | "cerrados">("contactados")
+  const [clientesMetric, setClientesMetric] = useState<"contactados" | "activos" | "cerrados">("cerrados")
   const [contenidoMetric, setContenidoMetric] = useState<"publicaciones" | "alcance">("publicaciones")
+  const [timeFilter, setTimeFilter] = useState<"dia" | "semana" | "mes" | "año">("mes")
 
   if (!agent) {
     return (
@@ -69,16 +70,103 @@ export default function AgentDetailPage() {
     )
   }
 
-  const salesMetrics = agent.salesMetrics || {
-    contacted: (agent.monthlyMetrics.leads || 0) * 3,
-    active: Math.floor((agent.monthlyMetrics.leads || 0) * 0.5),
-    closed: agent.monthlyMetrics.leads || 0,
-    conversionRate: 33.3,
-    avgDealValue: 250000,
-    totalRevenue: (agent.monthlyMetrics.leads || 0) * 250000,
+  // Calculate metrics based on time filter
+  const getTimeFilteredMetrics = () => {
+    const baseMetrics = agent.salesMetrics || {
+      contacted: (agent.monthlyMetrics.leads || 0) * 3,
+      active: Math.floor((agent.monthlyMetrics.leads || 0) * 0.5),
+      closed: agent.monthlyMetrics.leads || 0,
+      conversionRate: 33.3,
+      avgDealValue: 250000,
+      totalRevenue: (agent.monthlyMetrics.leads || 0) * 250000,
+    }
+
+    const multipliers = {
+      dia: 0.033,
+      semana: 0.25,
+      mes: 1,
+      año: 12,
+    }
+
+    const multiplier = multipliers[timeFilter]
+
+    return {
+      contacted: Math.floor(baseMetrics.contacted * multiplier),
+      active: Math.floor(baseMetrics.active * multiplier),
+      closed: Math.floor(baseMetrics.closed * multiplier),
+      posts: Math.floor(agent.monthlyMetrics.posts * multiplier),
+      conversionRate: baseMetrics.conversionRate,
+      avgDealValue: baseMetrics.avgDealValue,
+      totalRevenue: Math.floor(baseMetrics.totalRevenue * multiplier),
+    }
   }
 
-  const performanceHistory = agent.performanceHistory || []
+  const salesMetrics = getTimeFilteredMetrics()
+
+  const getTimeLabel = () => {
+    const labels = {
+      dia: "hoy",
+      semana: "esta semana",
+      mes: "este mes",
+      año: "este año",
+    }
+    return labels[timeFilter]
+  }
+
+  const getChartPeriodLabel = () => {
+    const labels = {
+      dia: "últimas 24 horas",
+      semana: "últimas 4 semanas",
+      mes: "últimos 6 meses",
+      año: "últimos 12 meses",
+    }
+    return labels[timeFilter]
+  }
+
+  const basePerformanceHistory = agent.performanceHistory || []
+
+  // Generate performance data based on time filter
+  const performanceHistory = useMemo(() => {
+    if (basePerformanceHistory.length === 0) return []
+
+    const baseData = basePerformanceHistory[basePerformanceHistory.length - 1]
+
+    if (timeFilter === "dia") {
+      // Last 24 hours (hourly data)
+      return Array.from({ length: 24 }, (_, i) => ({
+        month: `${i}h`,
+        contactados: Math.floor((baseData.contactados || 0) / 30 + Math.random() * 5),
+        activos: Math.floor((baseData.activos || 0) / 30 + Math.random() * 2),
+        cerrados: Math.floor((baseData.cerrados || 0) / 30 + Math.random() * 2),
+        publicaciones: Math.floor((baseData.publicaciones || 0) / 30 + Math.random() * 2),
+      }))
+    } else if (timeFilter === "semana") {
+      // Last 4 weeks (weekly data)
+      return Array.from({ length: 4 }, (_, i) => ({
+        month: `S${i + 1}`,
+        contactados: Math.floor((baseData.contactados || 0) / 4 + Math.random() * 10),
+        activos: Math.floor((baseData.activos || 0) / 4 + Math.random() * 5),
+        cerrados: Math.floor((baseData.cerrados || 0) / 4 + Math.random() * 3),
+        publicaciones: Math.floor((baseData.publicaciones || 0) / 4 + Math.random() * 3),
+      }))
+    } else if (timeFilter === "año") {
+      // Last 12 months
+      const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+      return months.map((month, i) => {
+        const isCurrentMonth = i === months.length - 1
+        return {
+          month,
+          contactados: isCurrentMonth ? (baseData.contactados || 0) : Math.floor((baseData.contactados || 0) * (0.8 + Math.random() * 0.4)),
+          activos: isCurrentMonth ? (baseData.activos || 0) : Math.floor((baseData.activos || 0) * (0.8 + Math.random() * 0.4)),
+          cerrados: isCurrentMonth ? (baseData.cerrados || 0) : Math.floor((baseData.cerrados || 0) * (0.8 + Math.random() * 0.4)),
+          publicaciones: isCurrentMonth ? (baseData.publicaciones || 0) : Math.floor((baseData.publicaciones || 0) * (0.8 + Math.random() * 0.4)),
+        }
+      })
+    }
+
+    // Default: mes (last 6 months)
+    return basePerformanceHistory
+  }, [basePerformanceHistory, timeFilter])
 
   const clientesChartConfig = {
     contactados: {
@@ -162,20 +250,34 @@ export default function AgentDetailPage() {
 
           {/* Tabs */}
           <Tabs defaultValue="resumen" className="w-full">
-            <TabsList className="inline-flex h-10 items-center justify-start gap-1 rounded-lg bg-muted p-1">
-              <TabsTrigger value="resumen" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
-                <BarChart3 className="size-4" />
-                Resumen
-              </TabsTrigger>
-              <TabsTrigger value="redes" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
-                <Share2 className="size-4" />
-                Redes Sociales
-              </TabsTrigger>
-              <TabsTrigger value="ventas" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
-                <TrendingUpIcon className="size-4" />
-                Ventas
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex items-center justify-between gap-4">
+              <TabsList className="inline-flex h-10 items-center justify-start gap-1 rounded-lg bg-muted p-1">
+                <TabsTrigger value="resumen" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
+                  <BarChart3 className="size-4" />
+                  Resumen
+                </TabsTrigger>
+                <TabsTrigger value="redes" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
+                  <Share2 className="size-4" />
+                  Redes Sociales
+                </TabsTrigger>
+                <TabsTrigger value="ventas" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
+                  <TrendingUpIcon className="size-4" />
+                  Ventas
+                </TabsTrigger>
+              </TabsList>
+
+              <Select value={timeFilter} onValueChange={(value: any) => setTimeFilter(value)}>
+                <SelectTrigger className="w-[140px] h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dia">Día</SelectItem>
+                  <SelectItem value="semana">Semana</SelectItem>
+                  <SelectItem value="mes">Mes</SelectItem>
+                  <SelectItem value="año">Año</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             {/* Resumen Tab */}
             <TabsContent value="resumen" className="mt-6 space-y-6">
@@ -188,7 +290,7 @@ export default function AgentDetailPage() {
                     </div>
                     <div className="flex items-baseline gap-2">
                       <span className="text-2xl font-bold tracking-tight">{salesMetrics.contacted}</span>
-                      <span className="text-xs text-muted-foreground">este mes</span>
+                      <span className="text-xs text-muted-foreground">{getTimeLabel()}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -212,7 +314,7 @@ export default function AgentDetailPage() {
                     </div>
                     <div className="flex items-baseline gap-2">
                       <span className="text-2xl font-bold tracking-tight">{salesMetrics.closed}</span>
-                      <span className="text-xs text-muted-foreground">este mes</span>
+                      <span className="text-xs text-muted-foreground">{getTimeLabel()}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -223,8 +325,8 @@ export default function AgentDetailPage() {
                       Publicaciones
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold tracking-tight">{agent.monthlyMetrics.posts}</span>
-                      <span className="text-xs text-muted-foreground">este mes</span>
+                      <span className="text-2xl font-bold tracking-tight">{salesMetrics.posts}</span>
+                      <span className="text-xs text-muted-foreground">{getTimeLabel()}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -240,7 +342,7 @@ export default function AgentDetailPage() {
                         <div>
                           <CardTitle className="text-base font-semibold">Rendimiento de Clientes</CardTitle>
                           <CardDescription className="mt-1 text-xs">
-                            Evolución últimos 6 meses
+                            Evolución {getChartPeriodLabel()}
                           </CardDescription>
                         </div>
                         <Select
@@ -292,7 +394,7 @@ export default function AgentDetailPage() {
                         <div>
                           <CardTitle className="text-base font-semibold">Rendimiento de Contenido</CardTitle>
                           <CardDescription className="mt-1 text-xs">
-                            Evolución últimos 6 meses
+                            Evolución {getChartPeriodLabel()}
                           </CardDescription>
                         </div>
                         <Select
@@ -432,7 +534,7 @@ export default function AgentDetailPage() {
                     <div className="text-3xl font-bold tracking-tight">
                       €{salesMetrics.totalRevenue.toLocaleString()}
                     </div>
-                    <p className="mt-1 text-xs text-muted-foreground">este mes</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{getTimeLabel()}</p>
                   </CardContent>
                 </Card>
 
