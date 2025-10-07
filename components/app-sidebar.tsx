@@ -38,7 +38,7 @@ const data = {
     },
     {
       title: "Agentes",
-      url: "#",
+      url: "/dashboard/agentes",
       icon: IconUsers,
     },
     {
