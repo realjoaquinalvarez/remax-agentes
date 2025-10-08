@@ -96,23 +96,24 @@ export async function GET(request: NextRequest) {
             category: pageInfoResponse.data.category || '',
           };
 
-          // Get TODAY's posts only (since midnight)
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const todayTimestamp = Math.floor(today.getTime() / 1000);
+          // Get this WEEK's posts (last 7 days)
+          const oneWeekAgo = new Date();
+          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+          oneWeekAgo.setHours(0, 0, 0, 0);
+          const weekTimestamp = Math.floor(oneWeekAgo.getTime() / 1000);
 
-          console.log(`   📅 Buscando posts desde: ${today.toISOString()}`);
+          console.log(`   📅 Buscando posts desde: ${oneWeekAgo.toISOString()}`);
 
-          const todayPostsResponse = await axios.get(`https://graph.facebook.com/v23.0/${page.id}/posts`, {
+          const weekPostsResponse = await axios.get(`https://graph.facebook.com/v23.0/${page.id}/posts`, {
             params: {
               fields: 'id,message,created_time,likes.summary(true),comments.summary(true),shares',
-              since: todayTimestamp,
+              since: weekTimestamp,
               access_token: page.access_token,
             },
           });
 
-          const posts = todayPostsResponse.data.data || [];
-          console.log(`   📄 Posts encontrados hoy: ${posts.length}`);
+          const posts = weekPostsResponse.data.data || [];
+          console.log(`   📄 Posts encontrados esta semana: ${posts.length}`);
 
           // Get reach for each post
           const postsWithReach = [];

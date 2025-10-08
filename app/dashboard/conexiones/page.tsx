@@ -327,7 +327,7 @@ function ConexionesContent() {
                             <p className="text-2xl font-bold">{page.followers_count.toLocaleString()}</p>
                           </div>
                           <div className="space-y-1">
-                            <p className="text-xs text-muted-foreground">Posts de Hoy</p>
+                            <p className="text-xs text-muted-foreground">Posts (7 días)</p>
                             <p className="text-2xl font-bold">{page.posts.length}</p>
                           </div>
                           <div className="space-y-1">
@@ -361,11 +361,11 @@ function ConexionesContent() {
                           </div>
                         )}
 
-                        {/* Today's Posts */}
+                        {/* Week's Posts */}
                         {page.posts.length > 0 ? (
                           <div className="border-t border-border/50 pt-4 space-y-3">
                             <div className="flex items-center justify-between">
-                              <h4 className="text-sm font-semibold">Publicaciones de Hoy</h4>
+                              <h4 className="text-sm font-semibold">Publicaciones de la Semana</h4>
                               <Badge variant="secondary" className="text-xs">
                                 {page.posts.length} {page.posts.length === 1 ? 'post' : 'posts'}
                               </Badge>
@@ -442,9 +442,9 @@ function ConexionesContent() {
                         ) : (
                           <div className="border-t border-border/50 pt-4">
                             <div className="rounded-lg border border-dashed border-border/50 p-6 text-center">
-                              <p className="text-sm text-muted-foreground">No hay publicaciones hoy</p>
+                              <p className="text-sm text-muted-foreground">No hay publicaciones esta semana</p>
                               <p className="text-xs text-muted-foreground mt-1">
-                                Los posts publicados hoy aparecerán aquí con sus métricas de alcance
+                                Los posts de los últimos 7 días aparecerán aquí con sus métricas de alcance
                               </p>
                             </div>
                           </div>
