@@ -24,6 +24,12 @@ import {
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { CheckCircle2, AlertCircle, Link2, RefreshCw } from "lucide-react"
 
 interface PagePost {
@@ -36,6 +42,8 @@ interface PagePost {
   engagement: number
   reach: number | null
   impressions: number | null
+  impressions_organic: number | null
+  impressions_paid: number | null
 }
 
 interface PageData {
@@ -390,40 +398,150 @@ function ConexionesContent() {
                                       <span>🔄</span>
                                       <span className="font-medium">{post.shares}</span>
                                     </span>
-                                    <div className="ml-auto flex items-center gap-3">
-                                      <span className="font-semibold text-primary">
-                                        Engagement: {post.engagement}
-                                      </span>
+                                    <div className="ml-auto flex items-center gap-2">
+                                      <TooltipProvider delayDuration={200}>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <span className="font-semibold text-primary cursor-help border-b border-dotted border-primary/30 hover:border-primary/60 transition-colors">
+                                              Engagement: {post.engagement}
+                                            </span>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="top" className="p-3">
+                                            <div className="space-y-2 min-w-[140px]">
+                                              <p className="text-xs font-medium mb-2 text-muted-foreground">Desglose</p>
+                                              <div className="flex items-center justify-between gap-4">
+                                                <span className="text-xs flex items-center gap-1.5">
+                                                  <span>❤️</span>
+                                                  <span>Likes</span>
+                                                </span>
+                                                <span className="text-xs font-semibold">{post.likes}</span>
+                                              </div>
+                                              <div className="flex items-center justify-between gap-4">
+                                                <span className="text-xs flex items-center gap-1.5">
+                                                  <span>💬</span>
+                                                  <span>Comentarios</span>
+                                                </span>
+                                                <span className="text-xs font-semibold">{post.comments}</span>
+                                              </div>
+                                              <div className="flex items-center justify-between gap-4">
+                                                <span className="text-xs flex items-center gap-1.5">
+                                                  <span>🔄</span>
+                                                  <span>Compartidos</span>
+                                                </span>
+                                                <span className="text-xs font-semibold">{post.shares}</span>
+                                              </div>
+                                              <div className="pt-2 mt-2 border-t border-border/50">
+                                                <div className="flex items-center justify-between gap-4">
+                                                  <span className="text-xs font-medium">Total</span>
+                                                  <span className="text-xs font-bold text-primary">{post.engagement}</span>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
                                     </div>
                                   </div>
 
                                   {/* Reach Metrics */}
-                                  {(post.reach !== null || post.impressions !== null) && (
-                                    <div className="flex items-center gap-4 pt-2 border-t border-border/30">
-                                      {post.reach !== null && (
-                                        <div className="flex items-center gap-2">
-                                          <div className="flex size-6 items-center justify-center rounded bg-blue-100 dark:bg-blue-950">
-                                            <span className="text-xs">👁️</span>
-                                          </div>
-                                          <div>
-                                            <p className="text-xs text-muted-foreground">Alcance Único</p>
-                                            <p className="text-sm font-semibold">{post.reach.toLocaleString()}</p>
-                                          </div>
-                                        </div>
-                                      )}
-                                      {post.impressions !== null && (
-                                        <div className="flex items-center gap-2">
-                                          <div className="flex size-6 items-center justify-center rounded bg-purple-100 dark:bg-purple-950">
-                                            <span className="text-xs">📊</span>
-                                          </div>
-                                          <div>
-                                            <p className="text-xs text-muted-foreground">Impresiones</p>
-                                            <p className="text-sm font-semibold">{post.impressions.toLocaleString()}</p>
-                                          </div>
-                                        </div>
-                                      )}
+                                  <div className="flex items-center gap-4 pt-2 border-t border-border/30">
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex size-6 items-center justify-center rounded bg-blue-100 dark:bg-blue-950">
+                                        <span className="text-xs">👁️</span>
+                                      </div>
+                                      <TooltipProvider delayDuration={200}>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <div className="cursor-help">
+                                              <p className="text-xs text-muted-foreground border-b border-dotted border-transparent hover:border-muted-foreground/30 transition-colors">Alcance Único</p>
+                                              <p className="text-sm font-semibold">
+                                                {post.reach !== null && post.reach !== undefined
+                                                  ? post.reach.toLocaleString()
+                                                  : <span className="text-muted-foreground">--</span>
+                                                }
+                                              </p>
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="top" className="max-w-[220px]">
+                                            <p className="text-xs">Personas únicas que vieron este post</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
                                     </div>
-                                  )}
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex size-6 items-center justify-center rounded bg-purple-100 dark:bg-purple-950">
+                                        <span className="text-xs">📊</span>
+                                      </div>
+                                      <TooltipProvider delayDuration={200}>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <div className="cursor-help">
+                                              <p className="text-xs text-muted-foreground border-b border-dotted border-transparent hover:border-muted-foreground/30 transition-colors">Impresiones</p>
+                                              <p className="text-sm font-semibold">
+                                                {post.impressions !== null && post.impressions !== undefined
+                                                  ? post.impressions.toLocaleString()
+                                                  : <span className="text-muted-foreground">--</span>
+                                                }
+                                              </p>
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="top" className="max-w-[220px]">
+                                            <p className="text-xs">Veces totales que se mostró (incluye repetidas)</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    </div>
+                                  </div>
+
+                                  {/* Reach Breakdown - Always show */}
+                                  <div className="flex items-center gap-4 pt-2 border-t border-border/30">
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex size-6 items-center justify-center rounded bg-green-100 dark:bg-green-950">
+                                        <span className="text-xs">🌱</span>
+                                      </div>
+                                      <TooltipProvider delayDuration={200}>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <div className="cursor-help">
+                                              <p className="text-xs text-muted-foreground border-b border-dotted border-transparent hover:border-muted-foreground/30 transition-colors">Orgánico</p>
+                                              <p className="text-sm font-semibold">
+                                                {post.impressions_organic !== null && post.impressions_organic !== undefined
+                                                  ? post.impressions_organic.toLocaleString()
+                                                  : '0'
+                                                }
+                                              </p>
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="top" className="max-w-[220px]">
+                                            <p className="text-xs">Impresiones naturales sin pagar</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex size-6 items-center justify-center rounded bg-amber-100 dark:bg-amber-950">
+                                        <span className="text-xs">💰</span>
+                                      </div>
+                                      <TooltipProvider delayDuration={200}>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <div className="cursor-help">
+                                              <p className="text-xs text-muted-foreground border-b border-dotted border-transparent hover:border-muted-foreground/30 transition-colors">Pagado</p>
+                                              <p className="text-sm font-semibold">
+                                                {post.impressions_paid !== null && post.impressions_paid !== undefined && post.impressions_paid > 0
+                                                  ? post.impressions_paid.toLocaleString()
+                                                  : '0'
+                                                }
+                                              </p>
+                                            </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="top" className="max-w-[220px]">
+                                            <p className="text-xs">Impresiones por promoción/ads pagados</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    </div>
+                                  </div>
 
                                   {/* Timestamp */}
                                   <p className="text-xs text-muted-foreground">

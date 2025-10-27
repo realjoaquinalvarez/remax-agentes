@@ -127,10 +127,12 @@ export async function GET(request: NextRequest) {
 
             let reach = null;
             let impressions = null;
+            let impressionsOrganic = null;
+            let impressionsPaid = null;
 
-            // Try to get reach for this specific post
             try {
-              const postInsightsResponse = await axios.get(
+              // Get basic reach metrics
+              const basicMetricsResponse = await axios.get(
                 `https://graph.facebook.com/v23.0/${post.id}/insights`,
                 {
                   params: {
@@ -140,16 +142,41 @@ export async function GET(request: NextRequest) {
                 }
               );
 
-              const insights = postInsightsResponse.data.data;
+              const basicInsights = basicMetricsResponse.data.data;
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              reach = insights.find((i: any) => i.name === 'post_impressions_unique')?.values[0]?.value || null;
+              reach = basicInsights.find((i: any) => i.name === 'post_impressions_unique')?.values[0]?.value || null;
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              impressions = insights.find((i: any) => i.name === 'post_impressions')?.values[0]?.value || null;
+              impressions = basicInsights.find((i: any) => i.name === 'post_impressions')?.values[0]?.value || null;
 
               console.log(`      Alcance único: ${reach || 'N/A'}`);
               console.log(`      Impresiones totales: ${impressions || 'N/A'}`);
+
+              // Try to get organic/paid breakdown
+              try {
+                const reachBreakdownResponse = await axios.get(
+                  `https://graph.facebook.com/v23.0/${post.id}/insights`,
+                  {
+                    params: {
+                      metric: 'post_impressions_organic,post_impressions_paid',
+                      access_token: page.access_token,
+                    },
+                  }
+                );
+
+                const reachInsights = reachBreakdownResponse.data.data;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                impressionsOrganic = reachInsights.find((i: any) => i.name === 'post_impressions_organic')?.values[0]?.value || null;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                impressionsPaid = reachInsights.find((i: any) => i.name === 'post_impressions_paid')?.values[0]?.value || null;
+
+                console.log(`      Impresiones orgánicas: ${impressionsOrganic || 'N/A'}`);
+                console.log(`      Impresiones pagadas: ${impressionsPaid || 'N/A'}`);
+              } catch (reachBreakdownError) {
+                console.log(`      ⚠️  No se pudo obtener desglose de alcance (normal para posts muy recientes)`);
+              }
+
             } catch (reachError) {
-              console.log(`      ⚠️  No se pudo obtener alcance del post ${post.id}`);
+              console.log(`      ⚠️  No se pudo obtener métricas del post ${post.id}`);
             }
 
             const postData = {
@@ -162,17 +189,18 @@ export async function GET(request: NextRequest) {
               engagement,
               reach,
               impressions,
+              impressions_organic: impressionsOrganic,
+              impressions_paid: impressionsPaid,
             };
 
             postsWithReach.push(postData);
 
             console.log(`\n   📄 Post: ${post.message?.substring(0, 50)}...`);
-            console.log(`      Likes: ${likes}`);
-            console.log(`      Comentarios: ${comments}`);
-            console.log(`      Compartidos: ${shares}`);
-            console.log(`      Engagement total: ${engagement}`);
-            console.log(`      Alcance: ${reach || 'N/A'}`);
-            console.log(`      Impresiones: ${impressions || 'N/A'}`);
+            console.log(`      Likes: ${likes} | Comentarios: ${comments} | Compartidos: ${shares}`);
+            console.log(`      Engagement: ${engagement} | Alcance: ${reach || 'N/A'} | Impresiones: ${impressions || 'N/A'}`);
+            if (impressionsOrganic || impressionsPaid) {
+              console.log(`      Orgánico: ${impressionsOrganic || 'N/A'} | Pagado: ${impressionsPaid || 'N/A'}`);
+            }
           }
 
           pageData.posts = postsWithReach;
