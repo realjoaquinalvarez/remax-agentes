@@ -235,8 +235,8 @@ export default function AdminPanelPage() {
                     accessibilityLayer
                     data={chartData}
                     margin={{
-                      left: 0,
-                      right: 0,
+                      left: 8,
+                      right: 8,
                       top: 10,
                       bottom: 10,
                     }}
@@ -260,7 +260,7 @@ export default function AdminPanelPage() {
                       axisLine={false}
                       tickMargin={4}
                       tick={{ fontSize: 10 }}
-                      width={28}
+                      width={35}
                       className="text-[9px] sm:text-[10px] lg:text-xs"
                     />
                     <ChartTooltip
