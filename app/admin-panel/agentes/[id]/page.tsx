@@ -414,24 +414,24 @@ export default function AgentDetailPage() {
                         </Select>
                       </div>
                     </CardHeader>
-                    <CardContent className="px-3 pt-0 pb-6">
-                      <ChartContainer config={clientesChartConfig} className="h-[240px] w-full">
+                    <CardContent className="px-1 sm:px-2 lg:px-3 pt-0 pb-4 sm:pb-6">
+                      <ChartContainer config={clientesChartConfig} className="h-[180px] sm:h-[200px] lg:h-[240px] w-full">
                         <LineChart
                           accessibilityLayer
                           data={performanceHistory}
-                          margin={{ left: 12, right: 12, top: 16, bottom: 16 }}
+                          margin={{ left: 0, right: 0, top: 10, bottom: 10 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
-                          <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
-                          <YAxis tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} width={40} />
-                          <ChartTooltip cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }} content={<ChartTooltipContent />} />
+                          <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={6} tick={{ fontSize: 10 }} className="text-[9px] sm:text-[10px]" />
+                          <YAxis tickLine={false} axisLine={false} tickMargin={4} tick={{ fontSize: 10 }} width={28} className="text-[9px] sm:text-[10px]" />
+                          <ChartTooltip cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }} content={<ChartTooltipContent className="text-xs" />} />
                           <Line
                             key={`clientes-${clientesMetric}`}
                             dataKey={clientesMetric}
                             type="monotone"
                             stroke={`var(--color-${clientesMetric})`}
-                            strokeWidth={2.5}
-                            dot={{ fill: `var(--color-${clientesMetric})`, strokeWidth: 2, r: 4, stroke: "hsl(var(--background))" }}
+                            strokeWidth={2}
+                            dot={{ fill: `var(--color-${clientesMetric})`, strokeWidth: 1.5, r: 3, stroke: "hsl(var(--background))" }}
                             animationDuration={300}
                             isAnimationActive={true}
                           />
@@ -465,24 +465,24 @@ export default function AgentDetailPage() {
                         </Select>
                       </div>
                     </CardHeader>
-                    <CardContent className="px-3 pt-0 pb-6">
-                      <ChartContainer config={contenidoChartConfig} className="h-[240px] w-full">
+                    <CardContent className="px-1 sm:px-2 lg:px-3 pt-0 pb-4 sm:pb-6">
+                      <ChartContainer config={contenidoChartConfig} className="h-[180px] sm:h-[200px] lg:h-[240px] w-full">
                         <LineChart
                           accessibilityLayer
                           data={contentHistory}
-                          margin={{ left: 12, right: 12, top: 16, bottom: 16 }}
+                          margin={{ left: 0, right: 0, top: 10, bottom: 10 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
-                          <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
-                          <YAxis tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} width={40} />
-                          <ChartTooltip cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }} content={<ChartTooltipContent />} />
+                          <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={6} tick={{ fontSize: 10 }} className="text-[9px] sm:text-[10px]" />
+                          <YAxis tickLine={false} axisLine={false} tickMargin={4} tick={{ fontSize: 10 }} width={28} className="text-[9px] sm:text-[10px]" />
+                          <ChartTooltip cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }} content={<ChartTooltipContent className="text-xs" />} />
                           <Line
                             key={`contenido-${contenidoMetric}`}
                             dataKey={contenidoMetric}
                             type="monotone"
                             stroke={`var(--color-${contenidoMetric})`}
-                            strokeWidth={2.5}
-                            dot={{ fill: `var(--color-${contenidoMetric})`, strokeWidth: 2, r: 4, stroke: "hsl(var(--background))" }}
+                            strokeWidth={2}
+                            dot={{ fill: `var(--color-${contenidoMetric})`, strokeWidth: 1.5, r: 3, stroke: "hsl(var(--background))" }}
                             animationDuration={300}
                             isAnimationActive={true}
                           />

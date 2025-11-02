@@ -26,16 +26,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis, Pie, PieChart, Cell, Area, AreaChart } from "recharts"
+import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis, Area, AreaChart } from "recharts"
 import {
-  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
 } from "@/components/ui/chart"
-import { Facebook, BarChart3, FileText, TrendingUp as TrendingUpIcon, User, ExternalLink, Info, Activity, MoreHorizontal, Eye, MessageCircle, Share2, ThumbsUp, Heart, MousePointerClick, PlayCircle, Target, InfoIcon, Link2 } from "lucide-react"
+import { Facebook, BarChart3, FileText, User, ExternalLink, Info, Activity, Eye, MessageCircle, Share2, ThumbsUp, Heart, MousePointerClick, PlayCircle, Target, InfoIcon, Link2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -57,12 +54,62 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
 
+interface FacebookPost {
+  id: string
+  message?: string
+  created_time: string
+  permalink_url: string
+  reach?: number
+  engagement?: number
+  post_clicks?: number
+  impressions?: number
+  likes?: number
+  comments?: number
+  shares?: number
+  reactions_total?: number
+  impressions_organic?: number
+  impressions_paid?: number
+  post_clicks_by_type?: Record<string, number>
+  post_activity_by_action_type?: Record<string, number>
+  video_views?: number
+  video_views_organic?: number
+  video_views_paid?: number
+  call_to_action?: { type: string }
+}
+
+interface FacebookMetrics {
+  totalReach: number
+  totalImpressions: number
+  totalPosts: number
+  totalLinkClicks: number
+  avgEngagementRate: string
+  timelineData: Array<{ date: string; reach: number; engagement: number; posts: number }>
+  filteredPosts: FacebookPost[]
+  topByReach: FacebookPost[]
+  topByEngagement: FacebookPost[]
+  topByClicks: FacebookPost[]
+  clickTypes: Record<string, number>
+}
+
+interface FacebookData {
+  user?: {
+    name?: string
+    email?: string
+  }
+  pages?: Array<{
+    id: string
+    name: string
+    link?: string
+    posts?: FacebookPost[]
+  }>
+}
+
 export default function PanelGeneralPage() {
   const router = useRouter()
   const agentId = "2"
   const agent = getAgentById(agentId)
 
-  const [facebookData, setFacebookData] = useState<any>(null)
+  const [facebookData, setFacebookData] = useState<FacebookData | null>(null)
   const [postFilter, setPostFilter] = useState<"all" | "week" | "month">("all")
 
   // Translation helper for click types
@@ -71,10 +118,27 @@ export default function PanelGeneralPage() {
       'other clicks': 'Otros clicks',
       'photo view': 'Ver foto',
       'link clicks': 'Clicks en enlaces',
+      'post link clicks': 'Clicks en enlaces', // New API name
       'video play': 'Reproducción de video',
       'other': 'Otros',
     }
     return translations[type.toLowerCase()] || type
+  }
+
+  // Helper to get link clicks from a post (includes WhatsApp links)
+  const getLinkClicks = (post: FacebookPost): number => {
+    if (!post.post_clicks_by_type) return 0
+
+    // Sum all link-related clicks (both old and new API format)
+    let linkClicks = 0
+    Object.entries(post.post_clicks_by_type).forEach(([type, count]) => {
+      const typeLower = type.toLowerCase()
+      if (typeLower.includes('link')) {
+        linkClicks += count
+      }
+    })
+
+    return linkClicks
   }
 
   // Load Facebook data from sessionStorage
@@ -91,25 +155,26 @@ export default function PanelGeneralPage() {
   }, [])
 
   // Calculate metrics from Facebook data
-  const facebookMetrics = useMemo(() => {
+  const facebookMetrics = useMemo((): FacebookMetrics | null => {
     if (!facebookData || !facebookData.pages || facebookData.pages.length === 0) {
       return null
     }
 
     const page = facebookData.pages[0]
-    const posts = page.posts || []
+    const posts = (page.posts || []) as FacebookPost[]
 
-    const totalReach = posts.reduce((sum: number, post: any) => sum + (post.reach || 0), 0)
-    const totalImpressions = posts.reduce((sum: number, post: any) => sum + (post.impressions || 0), 0)
-    const totalEngagement = posts.reduce((sum: number, post: any) => sum + (post.engagement || 0), 0)
-    const avgEngagementRate = posts.length > 0 ? (totalEngagement / posts.length).toFixed(1) : 0
+    const totalReach = posts.reduce((sum: number, post: FacebookPost) => sum + (post.reach || 0), 0)
+    const totalImpressions = posts.reduce((sum: number, post: FacebookPost) => sum + (post.impressions || 0), 0)
+    const totalEngagement = posts.reduce((sum: number, post: FacebookPost) => sum + (post.engagement || 0), 0)
+    const totalLinkClicks = posts.reduce((sum: number, post: FacebookPost) => sum + getLinkClicks(post), 0)
+    const avgEngagementRate = posts.length > 0 ? (totalEngagement / posts.length).toFixed(1) : "0.0"
 
     // Filter posts by date
     const now = new Date()
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
     const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
-    const filteredPosts = posts.filter((post: any) => {
+    const filteredPosts = posts.filter((post: FacebookPost) => {
       if (postFilter === "all") return true
       const postDate = new Date(post.created_time)
       if (postFilter === "week") return postDate >= oneWeekAgo
@@ -118,23 +183,23 @@ export default function PanelGeneralPage() {
     })
 
     // Top posts
-    const topByReach = [...posts].sort((a: any, b: any) => (b.reach || 0) - (a.reach || 0)).slice(0, 5)
-    const topByEngagement = [...posts].sort((a: any, b: any) => (b.engagement || 0) - (a.engagement || 0)).slice(0, 5)
-    const topByClicks = [...posts].sort((a: any, b: any) => (b.post_clicks || 0) - (a.post_clicks || 0)).slice(0, 5)
+    const topByReach = [...posts].sort((a: FacebookPost, b: FacebookPost) => (b.reach || 0) - (a.reach || 0)).slice(0, 5)
+    const topByEngagement = [...posts].sort((a: FacebookPost, b: FacebookPost) => (b.engagement || 0) - (a.engagement || 0)).slice(0, 5)
+    const topByClicks = [...posts].sort((a: FacebookPost, b: FacebookPost) => (b.post_clicks || 0) - (a.post_clicks || 0)).slice(0, 5)
 
     // Click breakdown
-    const clickTypes: { [key: string]: number } = {}
-    posts.forEach((post: any) => {
+    const clickTypes: Record<string, number> = {}
+    posts.forEach((post: FacebookPost) => {
       if (post.post_clicks_by_type) {
         Object.entries(post.post_clicks_by_type).forEach(([type, count]) => {
-          clickTypes[type] = (clickTypes[type] || 0) + (count as number)
+          clickTypes[type] = (clickTypes[type] || 0) + count
         })
       }
     })
 
     // Posts over time (group by date)
-    const postsOverTime: { [key: string]: { date: string; posts: number; engagement: number; reach: number } } = {}
-    posts.forEach((post: any) => {
+    const postsOverTime: Record<string, { date: string; posts: number; engagement: number; reach: number }> = {}
+    posts.forEach((post: FacebookPost) => {
       const date = new Date(post.created_time).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })
       if (!postsOverTime[date]) {
         postsOverTime[date] = { date, posts: 0, engagement: 0, reach: 0 }
@@ -151,11 +216,10 @@ export default function PanelGeneralPage() {
     })
 
     return {
-      page,
       totalPosts: posts.length,
       totalReach,
       totalImpressions,
-      totalEngagement,
+      totalLinkClicks,
       avgEngagementRate,
       filteredPosts,
       topByReach,
@@ -212,7 +276,7 @@ export default function PanelGeneralPage() {
             <Breadcrumb className="-ml-4">
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbPage>
+                  <BreadcrumbPage className="text-xs sm:text-sm truncate max-w-[200px] sm:max-w-none">
                     ¡Hola de nuevo, {facebookData?.user?.name || agent.name}!
                   </BreadcrumbPage>
                 </BreadcrumbItem>
@@ -224,37 +288,39 @@ export default function PanelGeneralPage() {
               onClick={() => {
                 window.location.href = '/api/auth/instagram';
               }}
-              className="gap-2"
+              className="gap-1.5 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2.5 sm:px-4"
+              size="sm"
             >
-              <Facebook className="size-4" />
-              Conectar Facebook
+              <Facebook className="size-3.5 sm:size-4" />
+              <span className="hidden xs:inline">Conectar Facebook</span>
+              <span className="xs:hidden">Facebook</span>
             </Button>
           }
         />
 
-        <div className="flex flex-1 flex-col gap-6 p-6 lg:p-8">
+        <div className="flex flex-1 flex-col gap-4 p-4 sm:gap-6 sm:p-6 lg:p-8">
           {/* Agent Header */}
-          <div className="flex items-center gap-4">
-            <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/10">
-              <User className="size-8 text-primary" />
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex size-12 sm:size-14 lg:size-16 shrink-0 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/10">
+              <User className="size-6 sm:size-7 lg:size-8 text-primary" />
             </div>
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold tracking-tight">
+            <div className="flex flex-col gap-0.5 sm:gap-1 min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h1 className="text-base sm:text-lg lg:text-xl font-bold tracking-tight truncate">
                   {facebookData?.pages?.[0]?.name || "Panel General"}
                 </h1>
                 {facebookData?.pages?.[0]?.link && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="size-6 text-muted-foreground hover:text-foreground"
-                    onClick={() => window.open(facebookData.pages[0].link, '_blank')}
+                    className="size-5 sm:size-6 text-muted-foreground hover:text-foreground shrink-0"
+                    onClick={() => window.open(facebookData.pages![0].link!, '_blank')}
                   >
-                    <ExternalLink className="size-4" />
+                    <ExternalLink className="size-3 sm:size-4" />
                   </Button>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">
                 {facebookData?.user?.email || agent.email}
               </p>
             </div>
@@ -262,95 +328,97 @@ export default function PanelGeneralPage() {
 
           {/* Tabs */}
           <Tabs defaultValue="rendimiento" className="w-full">
-            <TabsList className="inline-flex h-10 items-center justify-start gap-1 rounded-lg bg-muted p-1">
-              <TabsTrigger value="rendimiento" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
-                <BarChart3 className="size-4" />
-                Rendimiento
+            <TabsList className="grid w-full grid-cols-3 h-9 sm:h-10 rounded-lg bg-muted p-1">
+              <TabsTrigger value="rendimiento" className="inline-flex items-center justify-center gap-1 sm:gap-1.5 rounded-md text-xs sm:text-sm font-medium data-[state=active]:bg-background">
+                <BarChart3 className="size-3.5 sm:size-4" />
+                <span className="hidden xs:inline">Rendimiento</span>
               </TabsTrigger>
-              <TabsTrigger value="publicaciones" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
-                <FileText className="size-4" />
-                Publicaciones
+              <TabsTrigger value="publicaciones" className="inline-flex items-center justify-center gap-1 sm:gap-1.5 rounded-md text-xs sm:text-sm font-medium data-[state=active]:bg-background">
+                <FileText className="size-3.5 sm:size-4" />
+                <span className="hidden xs:inline">Publicaciones</span>
               </TabsTrigger>
-              <TabsTrigger value="estadisticas" className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
-                <Activity className="size-4" />
-                Estadísticas
+              <TabsTrigger value="estadisticas" className="inline-flex items-center justify-center gap-1 sm:gap-1.5 rounded-md text-xs sm:text-sm font-medium data-[state=active]:bg-background">
+                <Activity className="size-3.5 sm:size-4" />
+                <span className="hidden xs:inline">Estadísticas</span>
               </TabsTrigger>
             </TabsList>
 
             {/* Tab: Rendimiento */}
-            <TabsContent value="rendimiento" className="mt-6 space-y-6">
+            <TabsContent value="rendimiento" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
               {facebookMetrics ? (
                 <>
                   {/* Summary Metrics */}
-                  <div className="grid gap-3 md:grid-cols-5">
+                  <div className="grid gap-2.5 grid-cols-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-5">
                     <Card className="border-border/50 shadow-sm">
-                      <CardContent className="px-3.5">
-                        <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
+                      <CardContent className="p-3 sm:p-4">
+                        <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
                           Total Publicaciones
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-2xl font-bold tracking-tight">{facebookMetrics.totalPosts}</span>
+                        <div className="flex items-baseline gap-1 sm:gap-2">
+                          <span className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">{facebookMetrics.totalPosts}</span>
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card className="border-border/50 shadow-sm">
-                      <CardContent className="px-3.5">
-                        <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
+                      <CardContent className="p-3 sm:p-4">
+                        <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
                           Impresiones Totales
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-2xl font-bold tracking-tight">{facebookMetrics.totalImpressions.toLocaleString()}</span>
+                        <div className="flex items-baseline gap-1 sm:gap-2">
+                          <span className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">{facebookMetrics.totalImpressions.toLocaleString()}</span>
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card className="border-border/50 shadow-sm">
-                      <CardContent className="px-3.5">
-                        <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
+                      <CardContent className="p-3 sm:p-4">
+                        <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
                           Alcance Total
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-2xl font-bold tracking-tight">{facebookMetrics.totalReach.toLocaleString()}</span>
+                        <div className="flex items-baseline gap-1 sm:gap-2">
+                          <span className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">{facebookMetrics.totalReach.toLocaleString()}</span>
                         </div>
                       </CardContent>
                     </Card>
 
                     <Card className="border-border/50 shadow-sm">
-                      <CardContent className="px-3.5">
-                        <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
+                      <CardContent className="p-3 sm:p-4">
+                        <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
                           Tasa de Engagement
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-2xl font-bold tracking-tight">{facebookMetrics.avgEngagementRate}</span>
-                          <span className="text-xs text-muted-foreground">promedio</span>
+                        <div className="flex items-baseline gap-1 sm:gap-2">
+                          <span className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">{facebookMetrics.avgEngagementRate}</span>
+                          <span className="text-[9px] sm:text-xs text-muted-foreground">prom.</span>
                         </div>
                       </CardContent>
                     </Card>
 
-                    <Card className="border-border/50 shadow-sm">
-                      <CardContent className="px-3.5">
-                        <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-0.5">
-                          Mensajes WhatsApp
+                    <Card className="border-border/50 shadow-sm bg-gradient-to-br from-green-500/5 to-transparent col-span-2 md:col-span-1">
+                      <CardContent className="p-3 sm:p-4">
+                        <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-green-700 mb-1 sm:mb-1.5 flex items-center gap-0.5 sm:gap-1">
+                          <Link2 className="size-2.5 sm:size-3" />
+                          Clicks en Links
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-2xl font-bold tracking-tight">0</span>
+                        <div className="flex items-baseline gap-1 sm:gap-2">
+                          <span className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-green-700">{facebookMetrics.totalLinkClicks.toLocaleString()}</span>
                         </div>
+                        <p className="text-[8px] sm:text-[9px] lg:text-[10px] text-green-600/70 mt-1">Incluye WhatsApp y otros</p>
                       </CardContent>
                     </Card>
                   </div>
 
                   {/* Charts */}
-                  <div className="grid gap-4 lg:grid-cols-2">
+                  <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2">
                     {/* Reach Chart */}
                     <Card className="border-border/50 shadow-sm">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-base font-semibold">Alcance en el Tiempo</CardTitle>
-                        <CardDescription className="text-xs">
+                      <CardHeader className="pb-2 sm:pb-3">
+                        <CardTitle className="text-sm sm:text-base font-semibold">Alcance en el Tiempo</CardTitle>
+                        <CardDescription className="text-[10px] sm:text-xs">
                           Últimos 30 días
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="px-3 pt-0 pb-6">
+                      <CardContent className="px-1 sm:px-2 lg:px-3 pt-0 pb-4 sm:pb-6">
                         <ChartContainer
                           config={{
                             reach: {
@@ -358,23 +426,23 @@ export default function PanelGeneralPage() {
                               color: "#7c3aed",
                             },
                           }}
-                          className="h-[240px] w-full"
+                          className="h-[180px] sm:h-[200px] lg:h-[240px] w-full"
                         >
                           <LineChart
                             accessibilityLayer
                             data={facebookMetrics.timelineData.slice(-30)}
-                            margin={{ left: 12, right: 12, top: 16, bottom: 16 }}
+                            margin={{ left: 0, right: 0, top: 10, bottom: 10 }}
                           >
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
-                            <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
-                            <YAxis tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} width={40} />
-                            <ChartTooltip cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }} content={<ChartTooltipContent />} />
+                            <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={6} tick={{ fontSize: 10 }} className="text-[9px] sm:text-[10px]" />
+                            <YAxis tickLine={false} axisLine={false} tickMargin={4} tick={{ fontSize: 10 }} width={28} className="text-[9px] sm:text-[10px]" />
+                            <ChartTooltip cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }} content={<ChartTooltipContent className="text-xs" />} />
                             <Line
                               dataKey="reach"
                               type="monotone"
                               stroke="var(--color-reach)"
-                              strokeWidth={2.5}
-                              dot={{ fill: "var(--color-reach)", strokeWidth: 2, r: 4, stroke: "hsl(var(--background))" }}
+                              strokeWidth={2}
+                              dot={{ fill: "var(--color-reach)", strokeWidth: 1.5, r: 3, stroke: "hsl(var(--background))" }}
                             />
                           </LineChart>
                         </ChartContainer>
@@ -383,13 +451,13 @@ export default function PanelGeneralPage() {
 
                     {/* Timeline Chart */}
                     <Card className="border-border/50 shadow-sm">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-base font-semibold">Frecuencia de Publicación</CardTitle>
-                        <CardDescription className="text-xs">
+                      <CardHeader className="pb-2 sm:pb-3">
+                        <CardTitle className="text-sm sm:text-base font-semibold">Frecuencia de Publicación</CardTitle>
+                        <CardDescription className="text-[10px] sm:text-xs">
                           Últimos 30 días
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="px-3 pt-0 pb-6">
+                      <CardContent className="px-1 sm:px-2 lg:px-3 pt-0 pb-4 sm:pb-6">
                         <ChartContainer
                           config={{
                             posts: {
@@ -397,12 +465,12 @@ export default function PanelGeneralPage() {
                               color: "#10b981",
                             },
                           }}
-                          className="h-[240px] w-full"
+                          className="h-[180px] sm:h-[200px] lg:h-[240px] w-full"
                         >
                           <AreaChart
                             accessibilityLayer
                             data={facebookMetrics.timelineData.slice(-30)}
-                            margin={{ left: 12, right: 12, top: 16, bottom: 16 }}
+                            margin={{ left: 0, right: 0, top: 10, bottom: 10 }}
                           >
                             <defs>
                               <linearGradient id="fillPosts" x1="0" y1="0" x2="0" y2="1">
@@ -415,20 +483,23 @@ export default function PanelGeneralPage() {
                               dataKey="date"
                               tickLine={false}
                               axisLine={false}
-                              tickMargin={8}
-                              tick={{ fontSize: 12 }}
+                              tickMargin={6}
+                              tick={{ fontSize: 10 }}
+                              className="text-[9px] sm:text-[10px]"
                             />
                             <YAxis
                               tickLine={false}
                               axisLine={false}
-                              tickMargin={8}
-                              tick={{ fontSize: 12 }}
-                              width={30}
+                              tickMargin={4}
+                              tick={{ fontSize: 10 }}
+                              width={24}
                               allowDecimals={false}
+                              className="text-[9px] sm:text-[10px]"
                             />
                             <ChartTooltip
                               cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }}
                               content={<ChartTooltipContent
+                                className="text-xs"
                                 labelFormatter={(value) => `Fecha: ${value}`}
                                 formatter={(value) => [`${value} publicaciones`, "Total"]}
                               />}
@@ -439,7 +510,7 @@ export default function PanelGeneralPage() {
                               fill="url(#fillPosts)"
                               fillOpacity={0.4}
                               stroke="var(--color-posts)"
-                              strokeWidth={2.5}
+                              strokeWidth={2}
                             />
                           </AreaChart>
                         </ChartContainer>
@@ -467,7 +538,7 @@ export default function PanelGeneralPage() {
                   {/* Filter */}
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold">Publicaciones</h3>
-                    <Select value={postFilter} onValueChange={(value: any) => setPostFilter(value)}>
+                    <Select value={postFilter} onValueChange={(value: string) => setPostFilter(value as "all" | "week" | "month")}>
                       <SelectTrigger className="w-[180px]">
                         <SelectValue />
                       </SelectTrigger>
@@ -480,8 +551,8 @@ export default function PanelGeneralPage() {
                   </div>
 
                   {/* Posts Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {facebookMetrics.filteredPosts.map((post: any) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    {facebookMetrics.filteredPosts.map((post: FacebookPost) => (
                       <Card key={post.id} className="border-border/50 shadow-sm hover:shadow-lg transition-all overflow-hidden group">
                         <CardHeader className="pb-3">
                           <div className="flex items-start justify-between gap-3">
@@ -546,7 +617,7 @@ export default function PanelGeneralPage() {
                                   </TooltipContent>
                                 </Tooltip>
                               </div>
-                              <p className="text-lg font-bold">{post.post_clicks?.toLocaleString() || 0}</p>
+                              <p className="text-lg font-bold">{getLinkClicks(post).toLocaleString()}</p>
                             </div>
                             <div className="space-y-1 p-2.5 rounded-md bg-purple-500/5">
                               <div className="flex items-center gap-1.5">
@@ -637,7 +708,7 @@ export default function PanelGeneralPage() {
                                           </TooltipContent>
                                         </Tooltip>
                                       </div>
-                                      <p className="text-xl font-bold">{post.post_clicks?.toLocaleString() || 0}</p>
+                                      <p className="text-xl font-bold">{getLinkClicks(post).toLocaleString()}</p>
                                     </div>
                                     <div className="space-y-0.5 p-2.5 rounded-lg bg-purple-500/5">
                                       <div className="flex items-center gap-1.5">
@@ -722,6 +793,24 @@ export default function PanelGeneralPage() {
                                   </div>
                                 )}
 
+                                {/* Activity by Action Type (WhatsApp, etc) */}
+                                {post.post_activity_by_action_type && Object.keys(post.post_activity_by_action_type).length > 0 && (
+                                  <div className="p-3 rounded-xl border-border/50 border bg-gradient-to-br from-green-500/5 to-transparent">
+                                    <h4 className="text-xs font-semibold mb-2.5 flex items-center gap-1.5">
+                                      <MessageCircle className="size-3.5 text-green-600" />
+                                      Actividad por Acción (WhatsApp y otros)
+                                    </h4>
+                                    <div className="space-y-1.5">
+                                      {Object.entries(post.post_activity_by_action_type).map(([type, count]) => (
+                                        <div key={type} className="flex justify-between items-center p-2 rounded-lg bg-muted/50">
+                                          <span className="text-xs font-medium capitalize">{type.replace(/_/g, ' ')}</span>
+                                          <Badge variant="secondary" className="text-xs bg-green-600/10 text-green-700">{(count as number).toLocaleString()}</Badge>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
                                 {/* Video Views */}
                                 {(post.video_views || post.video_views_organic || post.video_views_paid) && (
                                   <div className="p-3 rounded-xl border-border/50 border bg-card">
@@ -781,13 +870,13 @@ export default function PanelGeneralPage() {
                   </div>
 
                   {/* Top Posts */}
-                  <div className="grid gap-4 md:grid-cols-3">
+                  <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                     <Card className="border-border/50">
-                      <CardHeader>
-                        <CardTitle className="text-sm">Top 3 por Alcance</CardTitle>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-xs sm:text-sm">Top 3 por Alcance</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3">
-                        {facebookMetrics.topByReach.slice(0, 3).map((post: any, index: number) => (
+                      <CardContent className="space-y-2 sm:space-y-3">
+                        {facebookMetrics.topByReach.slice(0, 3).map((post: FacebookPost, index: number) => (
                           <div key={post.id} className="flex items-start gap-2">
                             <Badge variant="outline" className="shrink-0 border-border/50">{index + 1}</Badge>
                             <div className="flex-1 min-w-0">
@@ -802,11 +891,11 @@ export default function PanelGeneralPage() {
                     </Card>
 
                     <Card className="border-border/50">
-                      <CardHeader>
-                        <CardTitle className="text-sm">Top 3 por Engagement</CardTitle>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-xs sm:text-sm">Top 3 por Engagement</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3">
-                        {facebookMetrics.topByEngagement.slice(0, 3).map((post: any, index: number) => (
+                      <CardContent className="space-y-2 sm:space-y-3">
+                        {facebookMetrics.topByEngagement.slice(0, 3).map((post: FacebookPost, index: number) => (
                           <div key={post.id} className="flex items-start gap-2">
                             <Badge variant="outline" className="shrink-0 border-border/50">{index + 1}</Badge>
                             <div className="flex-1 min-w-0">
@@ -820,12 +909,12 @@ export default function PanelGeneralPage() {
                       </CardContent>
                     </Card>
 
-                    <Card className="border-border/50">
-                      <CardHeader>
-                        <CardTitle className="text-sm">Top 3 por Clicks</CardTitle>
+                    <Card className="border-border/50 sm:col-span-2 lg:col-span-1">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-xs sm:text-sm">Top 3 por Clicks</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-3">
-                        {facebookMetrics.topByClicks.slice(0, 3).map((post: any, index: number) => (
+                      <CardContent className="space-y-2 sm:space-y-3">
+                        {facebookMetrics.topByClicks.slice(0, 3).map((post: FacebookPost, index: number) => (
                           <div key={post.id} className="flex items-start gap-2">
                             <Badge variant="outline" className="shrink-0 border-border/50">{index + 1}</Badge>
                             <div className="flex-1 min-w-0">
@@ -854,26 +943,26 @@ export default function PanelGeneralPage() {
             </TabsContent>
 
             {/* Tab: Estadísticas */}
-            <TabsContent value="estadisticas" className="mt-6 space-y-6">
+            <TabsContent value="estadisticas" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
               {facebookMetrics ? (
                 <>
                   {/* Click Breakdown */}
                   <Card className="border-border/50">
-                    <CardHeader>
-                      <CardTitle className="text-base font-semibold">Desglose de Clicks</CardTitle>
-                      <CardDescription className="text-xs">
+                    <CardHeader className="pb-2 sm:pb-3">
+                      <CardTitle className="text-sm sm:text-base font-semibold">Desglose de Clicks</CardTitle>
+                      <CardDescription className="text-[10px] sm:text-xs">
                         Distribución por tipo de click
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         {Object.entries(facebookMetrics.clickTypes).map(([type, count]) => (
                           <div key={type} className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="h-3 w-3 rounded-full bg-primary" />
-                              <span className="text-sm font-medium">{translateClickType(type)}</span>
+                            <div className="flex items-center gap-1.5 sm:gap-2">
+                              <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-primary shrink-0" />
+                              <span className="text-xs sm:text-sm font-medium">{translateClickType(type)}</span>
                             </div>
-                            <span className="text-sm font-bold">{(count as number).toLocaleString()}</span>
+                            <span className="text-xs sm:text-sm font-bold">{(count as number).toLocaleString()}</span>
                           </div>
                         ))}
                       </div>
@@ -882,13 +971,13 @@ export default function PanelGeneralPage() {
 
                   {/* Activity Timeline */}
                   <Card className="border-border/50">
-                    <CardHeader>
-                      <CardTitle className="text-base font-semibold">Frecuencia de Publicación</CardTitle>
-                      <CardDescription className="text-xs">
+                    <CardHeader className="pb-2 sm:pb-3">
+                      <CardTitle className="text-sm sm:text-base font-semibold">Frecuencia de Publicación</CardTitle>
+                      <CardDescription className="text-[10px] sm:text-xs">
                         Últimos 30 días
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="px-3 pt-0 pb-6">
+                    <CardContent className="px-1 sm:px-2 lg:px-3 pt-0 pb-4 sm:pb-6">
                       <ChartContainer
                         config={{
                           posts: {
@@ -896,17 +985,17 @@ export default function PanelGeneralPage() {
                             color: "#10b981",
                           },
                         }}
-                        className="h-[200px] w-full"
+                        className="h-[160px] sm:h-[180px] lg:h-[200px] w-full"
                       >
                         <BarChart
                           accessibilityLayer
                           data={facebookMetrics.timelineData.slice(-30)}
-                          margin={{ left: 12, right: 12, top: 16, bottom: 16 }}
+                          margin={{ left: 0, right: 0, top: 10, bottom: 10 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
-                          <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} />
-                          <YAxis tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 12 }} width={30} />
-                          <ChartTooltip cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }} content={<ChartTooltipContent />} />
+                          <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={6} tick={{ fontSize: 10 }} className="text-[9px] sm:text-[10px]" />
+                          <YAxis tickLine={false} axisLine={false} tickMargin={4} tick={{ fontSize: 10 }} width={24} className="text-[9px] sm:text-[10px]" />
+                          <ChartTooltip cursor={{ fill: "hsl(var(--muted))", opacity: 0.3 }} content={<ChartTooltipContent className="text-xs" />} />
                           <Bar dataKey="posts" fill="var(--color-posts)" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       </ChartContainer>

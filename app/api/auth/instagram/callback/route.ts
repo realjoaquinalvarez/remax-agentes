@@ -120,6 +120,7 @@ export async function GET(request: NextRequest) {
             post_clicks: number | null;
             post_clicks_by_type: Record<string, number> | null;
             post_consumptions_by_type: Record<string, number> | null;
+            post_activity_by_action_type: Record<string, number> | null;
           }>,
           instagram: null as { username: string; followers_count: number; media_count: number } | null,
         };
@@ -200,14 +201,15 @@ export async function GET(request: NextRequest) {
             let postClicks = null;
             let postClicksByType = null;
             let postConsumptionsByType = null;
+            let postActivityByActionType = null;
 
             try {
-              // Get comprehensive insights - ALL METRICS including video
+              // Get comprehensive insights - ALL METRICS including video and CTA actions
               const comprehensiveMetricsResponse = await axios.get(
                 `https://graph.facebook.com/v23.0/${post.id}/insights`,
                 {
                   params: {
-                    metric: 'post_impressions_unique,post_impressions,post_impressions_organic,post_impressions_paid,post_video_views,post_video_views_organic,post_video_views_paid,post_clicks,post_clicks_by_type,post_consumptions_by_type',
+                    metric: 'post_impressions_unique,post_impressions,post_impressions_organic,post_impressions_paid,post_video_views,post_video_views_organic,post_video_views_paid,post_clicks,post_clicks_by_type,post_consumptions_by_type,post_activity_by_action_type',
                     access_token: page.access_token,
                   },
                 }
@@ -235,6 +237,8 @@ export async function GET(request: NextRequest) {
               postClicksByType = insights.find((i: any) => i.name === 'post_clicks_by_type')?.values[0]?.value || null;
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               postConsumptionsByType = insights.find((i: any) => i.name === 'post_consumptions_by_type')?.values[0]?.value || null;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              postActivityByActionType = insights.find((i: any) => i.name === 'post_activity_by_action_type')?.values[0]?.value || null;
 
               console.log(`      📊 MÉTRICAS COMPLETAS:`);
               console.log(`         Alcance único: ${reach || '-'}`);
@@ -247,6 +251,7 @@ export async function GET(request: NextRequest) {
               console.log(`         Clicks totales: ${postClicks || '-'}`);
               console.log(`         Clicks por tipo:`, postClicksByType || '-');
               console.log(`         Consumo por tipo:`, postConsumptionsByType || '-');
+              console.log(`         🔥 ACTIVIDAD POR ACCIÓN (WhatsApp, etc):`, postActivityByActionType || '-');
 
             } catch (insightsError) {
               console.log(`      ⚠️  No se pudo obtener métricas del post ${post.id}`);
@@ -277,6 +282,7 @@ export async function GET(request: NextRequest) {
               post_clicks: postClicks,
               post_clicks_by_type: postClicksByType,
               post_consumptions_by_type: postConsumptionsByType,
+              post_activity_by_action_type: postActivityByActionType,
             };
 
             postsWithReach.push(postData);

@@ -83,8 +83,8 @@ export function   AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader className="h-auto px-3 py-3">
-        <a href="/admin-panel" className="flex items-center pl-2">
-          <img src="/REMAX_logo.svg.png" alt="Remax Logo" className="h-8 w-auto object-contain" />
+        <a href="/admin-panel" className="flex items-center ml-1">
+          <img src="/REMAX_logo.svg.png" alt="Remax Logo" className="h-12 w-auto object-contain" />
         </a>
       </SidebarHeader>
       <SidebarContent>

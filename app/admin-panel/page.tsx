@@ -127,96 +127,88 @@ export default function AdminPanelPage() {
             </Breadcrumb>
           }
         />
-        <div className="flex flex-1 flex-col gap-8 p-6 lg:p-8">
+        <div className="flex flex-1 flex-col gap-4 p-4 sm:gap-6 sm:p-6 lg:gap-8 lg:p-8">
           {/* Admin Panel Header */}
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Panel de Administrador</h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h2 className="text-xl font-bold tracking-tight sm:text-2xl">Panel de Administrador</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               Vista general de rendimiento de todos los agentes
             </p>
           </div>
 
           {/* Main Metrics */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 sm:gap-3">
             <Card className="border-border/50 shadow-sm">
-              <CardHeader className="pb-3">
-                <CardDescription className="text-xs font-medium uppercase tracking-wide">
+              <CardContent className="p-3 sm:p-4">
+                <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
                   Clientes Contactados
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                </div>
                 <div className="flex items-baseline justify-between">
-                  <div className="text-4xl font-bold tracking-tight">{totalContacted}</div>
-                  <div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
-                    <IconArrowUpRight className="size-3" />
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">{totalContacted}</div>
+                  <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                    <IconArrowUpRight className="size-2.5 sm:size-3" />
                     15%
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="mt-1 sm:mt-1.5 text-[9px] sm:text-[10px] text-muted-foreground">
                   este mes
                 </p>
               </CardContent>
             </Card>
 
             <Card className="border-border/50 shadow-sm">
-              <CardHeader className="pb-3">
-                <CardDescription className="text-xs font-medium uppercase tracking-wide">
+              <CardContent className="p-3 sm:p-4">
+                <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
                   Clientes Cerrados
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                </div>
                 <div className="flex items-baseline justify-between">
-                  <div className="text-4xl font-bold tracking-tight">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
                     {totalClosed}
                   </div>
-                  <div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
-                    <IconArrowUpRight className="size-3" />
+                  <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                    <IconArrowUpRight className="size-2.5 sm:size-3" />
                     12%
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="mt-1 sm:mt-1.5 text-[9px] sm:text-[10px] text-muted-foreground">
                   este mes
                 </p>
               </CardContent>
             </Card>
 
             <Card className="border-border/50 shadow-sm">
-              <CardHeader className="pb-3">
-                <CardDescription className="text-xs font-medium uppercase tracking-wide">
+              <CardContent className="p-3 sm:p-4">
+                <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
                   Publicaciones
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                </div>
                 <div className="flex items-baseline justify-between">
-                  <div className="text-4xl font-bold tracking-tight">{totalPosts}</div>
-                  <div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
-                    <IconArrowUpRight className="size-3" />
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">{totalPosts}</div>
+                  <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                    <IconArrowUpRight className="size-2.5 sm:size-3" />
                     8%
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="mt-1 sm:mt-1.5 text-[9px] sm:text-[10px] text-muted-foreground">
                   este mes
                 </p>
               </CardContent>
             </Card>
 
             <Card className="border-border/50 shadow-sm">
-              <CardHeader className="pb-3">
-                <CardDescription className="text-xs font-medium uppercase tracking-wide">
+              <CardContent className="p-3 sm:p-4">
+                <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
                   Alcance Total
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                </div>
                 <div className="flex items-baseline justify-between">
-                  <div className="text-4xl font-bold tracking-tight">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
                     {totalReach.toLocaleString()}
                   </div>
-                  <div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
-                    <IconArrowUpRight className="size-3" />
+                  <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                    <IconArrowUpRight className="size-2.5 sm:size-3" />
                     10%
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
+                <p className="mt-1 sm:mt-1.5 text-[9px] sm:text-[10px] text-muted-foreground">
                   personas alcanzadas
                 </p>
               </CardContent>
@@ -224,29 +216,29 @@ export default function AdminPanelPage() {
           </div>
 
           {/* Charts and Top Performers */}
-          <div className="grid gap-4 lg:grid-cols-7">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-7">
             <Card className="border-border/50 shadow-sm lg:col-span-4 flex flex-col">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-base font-semibold">Tendencia Mensual</CardTitle>
-                    <CardDescription className="mt-1 text-xs">
+              <CardHeader className="pb-2 sm:pb-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <CardTitle className="text-sm sm:text-base font-semibold truncate">Tendencia Mensual</CardTitle>
+                    <CardDescription className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs">
                       Clientes cerrados y publicaciones últimos 6 meses
                     </CardDescription>
                   </div>
-                  <IconTrendingUp className="size-4 text-muted-foreground" />
+                  <IconTrendingUp className="size-3.5 sm:size-4 text-muted-foreground shrink-0" />
                 </div>
               </CardHeader>
-              <CardContent className="px-3 pt-0 pb-6 flex-1">
-                <ChartContainer config={chartConfig} className="h-full w-full">
+              <CardContent className="px-1 sm:px-2 lg:px-3 pt-0 pb-4 sm:pb-6 flex-1">
+                <ChartContainer config={chartConfig} className="h-[200px] sm:h-[250px] lg:h-full w-full">
                   <LineChart
                     accessibilityLayer
                     data={chartData}
                     margin={{
-                      left: 12,
-                      right: 12,
-                      top: 16,
-                      bottom: 16,
+                      left: 0,
+                      right: 0,
+                      top: 10,
+                      bottom: 10,
                     }}
                   >
                     <CartesianGrid
@@ -259,51 +251,57 @@ export default function AdminPanelPage() {
                       dataKey="month"
                       tickLine={false}
                       axisLine={false}
-                      tickMargin={8}
-                      tick={{ fontSize: 12 }}
+                      tickMargin={6}
+                      tick={{ fontSize: 10 }}
+                      className="text-[9px] sm:text-[10px] lg:text-xs"
                     />
                     <YAxis
                       tickLine={false}
                       axisLine={false}
-                      tickMargin={8}
-                      tick={{ fontSize: 12 }}
-                      width={40}
+                      tickMargin={4}
+                      tick={{ fontSize: 10 }}
+                      width={28}
+                      className="text-[9px] sm:text-[10px] lg:text-xs"
                     />
                     <ChartTooltip
                       cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }}
-                      content={<ChartTooltipContent />}
+                      content={<ChartTooltipContent className="text-xs" />}
                     />
-                    <ChartLegend content={<ChartLegendContent />} />
+                    <ChartLegend content={<ChartLegendContent className="text-xs sm:text-sm" />} />
                     <Line
                       dataKey="cerrados"
                       type="monotone"
                       stroke="var(--color-cerrados)"
-                      strokeWidth={2.5}
+                      strokeWidth={2}
                       dot={{
                         fill: "var(--color-cerrados)",
-                        strokeWidth: 2,
-                        r: 5,
+                        strokeWidth: 1.5,
+                        r: 3,
                         stroke: "hsl(var(--background))",
+                        className: "sm:r-4 lg:r-5"
                       }}
                       activeDot={{
-                        r: 7,
+                        r: 5,
                         strokeWidth: 2,
+                        className: "sm:r-6 lg:r-7"
                       }}
                     />
                     <Line
                       dataKey="publicaciones"
                       type="monotone"
                       stroke="var(--color-publicaciones)"
-                      strokeWidth={2.5}
+                      strokeWidth={2}
                       dot={{
                         fill: "var(--color-publicaciones)",
-                        strokeWidth: 2,
-                        r: 5,
+                        strokeWidth: 1.5,
+                        r: 3,
                         stroke: "hsl(var(--background))",
+                        className: "sm:r-4 lg:r-5"
                       }}
                       activeDot={{
-                        r: 7,
+                        r: 5,
                         strokeWidth: 2,
+                        className: "sm:r-6 lg:r-7"
                       }}
                     />
                   </LineChart>
@@ -312,16 +310,16 @@ export default function AdminPanelPage() {
             </Card>
 
             <Card className="border-border/50 shadow-sm lg:col-span-3 flex flex-col">
-              <CardHeader className="pb-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <CardTitle className="text-base font-semibold">Mejores Agentes</CardTitle>
-                    <CardDescription className="mt-1 text-xs">
+              <CardHeader className="pb-3 sm:pb-4">
+                <div className="flex items-start justify-between gap-2 sm:gap-4">
+                  <div className="min-w-0">
+                    <CardTitle className="text-sm sm:text-base font-semibold">Mejores Agentes</CardTitle>
+                    <CardDescription className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs">
                       Clientes conseguidos {getTimeLabel()}
                     </CardDescription>
                   </div>
                   <Select value={topPerformersFilter} onValueChange={(value) => setTopPerformersFilter(value as "dia" | "semana" | "mes" | "año")}>
-                    <SelectTrigger className="h-8 w-[110px] text-xs">
+                    <SelectTrigger className="h-7 sm:h-8 w-[90px] sm:w-[110px] text-[10px] sm:text-xs shrink-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -333,7 +331,7 @@ export default function AdminPanelPage() {
                   </Select>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2 px-4 flex-1">
+              <CardContent className="space-y-1.5 sm:space-y-2 px-3 sm:px-4 flex-1">
                 {mockAgents
                   .map((agent) => ({
                     ...agent,
@@ -355,35 +353,35 @@ export default function AdminPanelPage() {
                       <div
                         key={agent.id}
                         onClick={() => router.push(`/admin-panel/agentes/${agent.id}`)}
-                        className="group relative overflow-hidden rounded-xl border border-border/40 bg-card p-3 transition-all hover:border-primary/40 hover:shadow-sm cursor-pointer"
+                        className="group relative overflow-hidden rounded-lg sm:rounded-xl border border-border/40 bg-card p-2.5 sm:p-3 transition-all hover:border-primary/40 hover:shadow-sm cursor-pointer"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3">
                           {/* User Icon */}
-                          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                            <User className="size-4 text-primary" />
+                          <div className="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                            <User className="size-3.5 sm:size-4 text-primary" />
                           </div>
 
                           {/* Name */}
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium">
+                            <p className="truncate text-xs sm:text-sm font-medium">
                               {agent.name}
                             </p>
                           </div>
 
                           {/* Client Count */}
                           <div className="shrink-0 text-right">
-                            <div className="text-lg font-semibold text-primary">
+                            <div className="text-base sm:text-lg font-semibold text-primary">
                               {agent.filteredLeads}
                             </div>
-                            <div className="text-[9px] font-medium text-muted-foreground">
+                            <div className="text-[8px] sm:text-[9px] font-medium text-muted-foreground">
                               clientes
                             </div>
                           </div>
                         </div>
 
                         {/* Progress Bar */}
-                        <div className="mt-3">
-                          <Progress value={percentage} className="h-1" />
+                        <div className="mt-2 sm:mt-3">
+                          <Progress value={percentage} className="h-0.5 sm:h-1" />
                         </div>
                       </div>
                     )

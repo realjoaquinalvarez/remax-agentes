@@ -8,11 +8,12 @@ export async function GET() {
   const scope = [
     'public_profile',
     'email',
-    'pages_read_engagement',
-    'pages_manage_engagement',
-    'read_insights',
-    'instagram_basic',
-    'instagram_manage_insights'
+    'pages_show_list',              // Required to list pages
+    'pages_read_engagement',        // Read engagement data
+    'pages_read_user_content',      // Required for post_clicks_by_type and detailed metrics
+    'read_insights',                // Read page insights
+    'instagram_basic',              // Basic Instagram access
+    'instagram_manage_insights'     // Instagram insights
   ].join(',');
 
   // URL de autorización de Facebook
