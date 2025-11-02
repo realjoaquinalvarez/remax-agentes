@@ -31,20 +31,22 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  navMain: [
+  navAdmin: [
     {
-      title: "Dashboard",
-      url: "/dashboard",
+      title: "Panel de Administrador",
+      url: "/admin-panel",
       icon: IconDashboard,
     },
+  ],
+  navMain: [
     {
       title: "Agentes",
-      url: "/dashboard/agentes",
+      url: "/admin-panel/agentes",
       icon: IconUsers,
     },
     {
       title: "Conexiones",
-      url: "/dashboard/conexiones",
+      url: "/admin-panel/conexiones",
       icon: IconPlugConnected,
     },
     {
@@ -75,22 +77,13 @@ const data = {
 export function   AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <a href="/dashboard">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Remax Agentes</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarHeader className="h-auto px-3 py-3">
+        <a href="/admin-panel" className="flex items-center pl-2">
+          <img src="/REMAX_logo.svg.png" alt="Remax Logo" className="h-8 w-auto object-contain" />
+        </a>
       </SidebarHeader>
       <SidebarContent>
+        <NavMain items={data.navAdmin} />
         <NavMain items={data.navMain} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

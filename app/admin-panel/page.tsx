@@ -42,7 +42,7 @@ import { IconTrendingUp, IconArrowUpRight } from "@tabler/icons-react"
 import { User } from "lucide-react"
 import { mockAgents } from "@/lib/data/mock-agents"
 
-export default function DashboardPage() {
+export default function AdminPanelPage() {
   const router = useRouter()
   const [topPerformersFilter, setTopPerformersFilter] = React.useState<"dia" | "semana" | "mes" | "año">("mes")
 
@@ -109,7 +109,7 @@ export default function DashboardPage() {
     <SidebarProvider
       style={
         {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--sidebar-width": "calc(var(--spacing) * 64)",
           "--header-height": "calc(var(--spacing) * 12)",
         } as React.CSSProperties
       }
@@ -121,16 +121,16 @@ export default function DashboardPage() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                  <BreadcrumbPage>Panel de Administrador</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           }
         />
         <div className="flex flex-1 flex-col gap-8 p-6 lg:p-8">
-          {/* Dashboard Header */}
+          {/* Admin Panel Header */}
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Panel de Administrador</h2>
             <p className="text-sm text-muted-foreground mt-1">
               Vista general de rendimiento de todos los agentes
             </p>
@@ -354,7 +354,7 @@ export default function DashboardPage() {
                     return (
                       <div
                         key={agent.id}
-                        onClick={() => router.push(`/dashboard/agentes/${agent.id}`)}
+                        onClick={() => router.push(`/admin-panel/agentes/${agent.id}`)}
                         className="group relative overflow-hidden rounded-xl border border-border/40 bg-card p-3 transition-all hover:border-primary/40 hover:shadow-sm cursor-pointer"
                       >
                         <div className="flex items-center gap-3">

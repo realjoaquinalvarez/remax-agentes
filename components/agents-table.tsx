@@ -198,7 +198,7 @@ export function AgentsTable({ agents, type }: AgentsTableProps) {
               size="sm"
               onClick={(e) => {
                 e.stopPropagation()
-                router.push(`/dashboard/agentes/${agent.id}`)
+                router.push(`/admin-panel/agentes/${agent.id}`)
               }}
               className="h-8 text-xs hover:bg-primary/10 hover:text-primary"
             >
@@ -377,7 +377,7 @@ export function AgentsTable({ agents, type }: AgentsTableProps) {
               size="sm"
               onClick={(e) => {
                 e.stopPropagation()
-                router.push(`/dashboard/agentes/${agent.id}`)
+                router.push(`/admin-panel/agentes/${agent.id}`)
               }}
               className="h-8 text-xs hover:bg-primary/10 hover:text-primary"
             >
