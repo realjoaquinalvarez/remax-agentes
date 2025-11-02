@@ -220,15 +220,15 @@ export function PropertiesTable({ properties }: { properties: Property[] }) {
   })
 
   return (
-    <div className="w-full space-y-4">
-      <div className="flex items-center gap-4">
+    <div className="w-full space-y-3 sm:space-y-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
         <Input
           placeholder="Buscar por dirección..."
           value={(table.getColumn("address")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("address")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm border-border/50 shadow-sm"
+          className="w-full sm:max-w-sm border-border/50 shadow-sm text-sm"
         />
 
         <Select
@@ -237,7 +237,7 @@ export function PropertiesTable({ properties }: { properties: Property[] }) {
             table.getColumn("status")?.setFilterValue(value === "all" ? "" : value)
           }
         >
-          <SelectTrigger className="w-[180px] border-border/50 shadow-sm">
+          <SelectTrigger className="w-full sm:w-[180px] border-border/50 shadow-sm text-sm">
             <SelectValue placeholder="Estado" />
           </SelectTrigger>
           <SelectContent>
@@ -251,7 +251,7 @@ export function PropertiesTable({ properties }: { properties: Property[] }) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto border-border/50 shadow-sm">
+            <Button variant="outline" className="w-full sm:w-auto sm:ml-auto border-border/50 shadow-sm text-sm">
               Columnas <ChevronDown className="ml-2 size-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -278,67 +278,69 @@ export function PropertiesTable({ properties }: { properties: Property[] }) {
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border/50 shadow-sm">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id} className="text-xs sm:text-sm whitespace-nowrap">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    )
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No se encontraron propiedades.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="text-xs sm:text-sm">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-xs sm:text-sm"
+                  >
+                    No se encontraron propiedades.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+        <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
           Mostrando {table.getRowModel().rows.length} de {properties.length} propiedades
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 order-1 sm:order-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="border-border/50 shadow-sm"
+            className="border-border/50 shadow-sm text-xs sm:text-sm h-8"
           >
             Anterior
           </Button>
@@ -347,7 +349,7 @@ export function PropertiesTable({ properties }: { properties: Property[] }) {
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="border-border/50 shadow-sm"
+            className="border-border/50 shadow-sm text-xs sm:text-sm h-8"
           >
             Siguiente
           </Button>

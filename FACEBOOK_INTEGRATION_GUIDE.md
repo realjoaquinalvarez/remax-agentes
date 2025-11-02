@@ -1,12 +1,40 @@
 # 📚 Documentación Completa: Facebook Graph API para Dashboard de Agentes RE/MAX
 
+## ✅ Estado: IMPLEMENTADO Y FUNCIONANDO
+
+**Production URL:** https://dashboard-agentes-kappa.vercel.app
+
+Esta guía documenta la implementación completada del sistema de integración con Facebook/Instagram.
+
+---
+
 ## 🎯 Objetivo del Sistema
 
 Crear un dashboard donde:
 - **Cada agente** conecta su página de Facebook/Instagram
-- **El sistema** obtiene métricas de engagement de cada agente
+- **El sistema** obtiene métricas de engagement de cada agente (últimos 60 días)
 - **El jefe** ve un resumen consolidado de todos los agentes
 - **Cada agente** solo ve sus propias métricas
+
+## 📊 Métricas Implementadas
+
+### Posts de Facebook (Últimos 60 días):
+- ✅ Likes, comentarios, shares
+- ✅ Engagement total
+- ✅ Alcance único (reach)
+- ✅ Impresiones totales
+- ✅ Impresiones orgánicas vs pagadas
+
+### Páginas de Facebook:
+- ✅ Fan count (seguidores)
+- ✅ Followers count
+- ✅ Categoría de la página
+- ✅ Link de la página
+
+### Instagram Business (si está conectado):
+- ✅ Username
+- ✅ Followers count
+- ✅ Media count
 
 ---
 
@@ -1565,13 +1593,228 @@ Usa las credenciales de la app "remax-app-2":
 
 ---
 
-## 🔗 Recursos Útiles
+## 🚨 Troubleshooting - Problemas Reales Encontrados y Solucionados
 
-- [Facebook Graph API Documentation](https://developers.facebook.com/docs/graph-api)
-- [Facebook Login Documentation](https://developers.facebook.com/docs/facebook-login)
-- [Instagram Basic Display API](https://developers.facebook.com/docs/instagram-basic-display-api)
-- [Facebook App Review Process](https://developers.facebook.com/docs/app-review)
+### Problema 1: "El dominio de esta URL no está incluido en los dominios de la app"
+
+**Síntoma:**
+```
+No se puede cargar la URL
+El dominio de esta URL no está incluido en los dominios de la app
+```
+
+**Causa:**
+El dominio de tu aplicación no está agregado en Facebook App Settings.
+
+**Solución:**
+1. Ve a https://developers.facebook.com/apps/2806983572834618/settings/basic/
+2. En **"Dominios de la app"** agrega: `dashboard-agentes-kappa.vercel.app`
+3. Guarda cambios
 
 ---
 
-**Última actualización:** 7 de octubre, 2025
+### Problema 2: "Redirect URI Mismatch" con caracteres extraños en la URL
+
+**Síntoma:**
+URL del error contiene `%0A` (salto de línea):
+```
+redirect_uri=https%3A%2F%2Fdashboard-agentes-kappa.vercel.app%0A%2Fapi%2F...
+                                                          ^^^
+```
+
+**Causa:**
+Se usó `echo` en lugar de `printf` al configurar la variable `NEXTAUTH_URL` en Vercel, lo que agregó un salto de línea al final.
+
+**Solución:**
+```bash
+# 1. Eliminar variable incorrecta
+echo "y" | vercel env rm NEXTAUTH_URL production
+
+# 2. Agregar correctamente con printf (sin salto de línea)
+printf "https://dashboard-agentes-kappa.vercel.app" | vercel env add NEXTAUTH_URL production
+
+# 3. Redesplegar
+vercel --prod --yes
+vercel alias NEW_DEPLOYMENT_ID dashboard-agentes-kappa.vercel.app
+```
+
+---
+
+### Problema 3: "Error validating client secret"
+
+**Síntoma:**
+Error en el callback de OAuth:
+```
+?error=token_failed&detail=Error%20validating%20client%20secret
+```
+
+**Causa:**
+La variable `META_APP_SECRET` en Vercel tiene un salto de línea al final (mismo problema que NEXTAUTH_URL).
+
+**Solución:**
+```bash
+# 1. Eliminar secret incorrecto
+echo "y" | vercel env rm META_APP_SECRET production
+
+# 2. Agregar correctamente con printf
+printf "daf7ecfaf23ad48f8dd5e602c16e3c30" | vercel env add META_APP_SECRET production
+
+# 3. Redesplegar
+vercel --prod --yes
+vercel alias NEW_DEPLOYMENT_ID dashboard-agentes-kappa.vercel.app
+```
+
+**Regla de oro:** SIEMPRE usa `printf` (no `echo`) al agregar variables de entorno con Vercel CLI.
+
+---
+
+### Problema 4: No encuentro "Valid OAuth Redirect URIs" en Facebook
+
+**Síntoma:**
+No puedes encontrar dónde agregar la URI de callback en Facebook Developer Console.
+
+**Causa:**
+El producto "Facebook Login" no está agregado a tu app.
+
+**Solución:**
+1. En el menú izquierdo, busca **"Productos"**
+2. Click en **"Agregar producto"**
+3. Selecciona **"Inicio de sesión con Facebook"** (Facebook Login)
+4. Una vez agregado, aparecerá en el menú lateral izquierdo
+5. Click en **"Inicio de sesión con Facebook" → "Configurar"**
+6. Ahora verás **"Validador de URI de redireccionamiento"** y **"URI de redireccionamiento de OAuth válidos"**
+7. Agrega: `https://dashboard-agentes-kappa.vercel.app/api/auth/instagram/callback`
+
+---
+
+### Problema 5: Validador de URI da error aunque la agregué
+
+**Síntoma:**
+El validador dice "Este URI de redireccionamiento no es válido para esta app" aunque ya la agregaste.
+
+**Causa:**
+El validador revisa ANTES de que guardes. Primero debes agregar la URI a la lista, luego validar.
+
+**Solución:**
+1. Ignora el error del validador por ahora
+2. Ve a la sección **"URI de redireccionamiento de OAuth válidos"** (más abajo en la página)
+3. Agrega la URI completa con `https://`:
+   ```
+   https://dashboard-agentes-kappa.vercel.app/api/auth/instagram/callback
+   ```
+4. Click **"Guardar cambios"**
+5. AHORA sí, puedes usar el validador y debería funcionar
+
+---
+
+### Problema 6: Dominio del SDK para JavaScript incorrecto
+
+**Síntoma:**
+En "Dominios permitidos para el SDK para JavaScript" agregaste `https://dashboard-agentes-kappa.vercel.app/` y da problemas.
+
+**Causa:**
+Este campo solo acepta el dominio puro, sin protocolo ni barras.
+
+**Solución:**
+- ❌ Incorrecto: `https://dashboard-agentes-kappa.vercel.app/`
+- ✅ Correcto: `dashboard-agentes-kappa.vercel.app`
+
+**Nota:** Facebook puede agregar automáticamente el formato correcto cuando guardas, pero es mejor ponerlo bien desde el inicio.
+
+---
+
+### Problema 7: Funciona en localhost pero no en producción
+
+**Síntoma:**
+OAuth funciona perfectamente en `localhost:3000` pero falla en la URL de producción.
+
+**Causas posibles:**
+1. Variables de entorno diferentes en local vs producción
+2. URLs mal configuradas en Facebook App
+3. Problemas con los saltos de línea en las variables (ver Problema 2 y 3)
+
+**Solución:**
+1. Verifica las variables de entorno en producción:
+   ```bash
+   # Crear endpoint temporal de debug
+   curl https://dashboard-agentes-kappa.vercel.app/api/debug-env
+   ```
+
+2. Asegúrate de que Facebook App tenga AMBAS URLs configuradas:
+   - localhost (para desarrollo): `http://localhost:3000/api/auth/instagram/callback`
+   - producción: `https://dashboard-agentes-kappa.vercel.app/api/auth/instagram/callback`
+
+3. Verifica que no haya saltos de línea en las variables (ver Problema 2 y 3)
+
+---
+
+## 📋 Checklist de Configuración Correcta
+
+Usa este checklist para verificar que todo está configurado correctamente:
+
+### Vercel:
+- [ ] `NEXT_PUBLIC_META_APP_ID` configurado (16 caracteres)
+- [ ] `META_APP_SECRET` configurado (32 caracteres)
+- [ ] `NEXTAUTH_URL` = `https://dashboard-agentes-kappa.vercel.app` (sin salto de línea)
+- [ ] `NEXTAUTH_SECRET` configurado
+- [ ] Alias permanente creado: `dashboard-agentes-kappa.vercel.app`
+- [ ] Variables agregadas con `printf` (no con `echo`)
+
+### Facebook App - Settings → Basic:
+- [ ] **Dominios de la app:** `dashboard-agentes-kappa.vercel.app`
+- [ ] App ID: `2806983572834618`
+- [ ] App Secret visible (con botón "Mostrar")
+
+### Facebook App - Facebook Login → Settings:
+- [ ] **Valid OAuth Redirect URIs:** `https://dashboard-agentes-kappa.vercel.app/api/auth/instagram/callback`
+- [ ] **Dominios permitidos para el SDK para JavaScript:** `dashboard-agentes-kappa.vercel.app`
+- [ ] **Inicio de sesión del cliente de OAuth:** Activado (switch en Sí)
+- [ ] **Inicio de sesión de OAuth web:** Activado (switch en Sí)
+- [ ] **Aplicar HTTPS:** Activado (switch en Sí)
+
+### Prueba final:
+- [ ] Ir a: https://dashboard-agentes-kappa.vercel.app/dashboard/conexiones
+- [ ] Click en "Conectar Facebook"
+- [ ] Se abre diálogo de Facebook (no error de dominio)
+- [ ] Autorizar permisos
+- [ ] Redirige de vuelta con éxito
+- [ ] Muestra páginas conectadas
+- [ ] Muestra posts de los últimos 60 días con métricas
+
+---
+
+## 🔗 Recursos Útiles
+
+### Documentación Oficial:
+- [Facebook Graph API Documentation](https://developers.facebook.com/docs/graph-api)
+- [Facebook Login Documentation](https://developers.facebook.com/docs/facebook-login)
+- [Instagram Platform API](https://developers.facebook.com/docs/instagram-platform)
+- [Facebook Permissions Reference](https://developers.facebook.com/docs/permissions/reference)
+- [Graph API Explorer](https://developers.facebook.com/tools/explorer/)
+
+### Tu Aplicación:
+- **App en Facebook:** https://developers.facebook.com/apps/2806983572834618
+- **Dashboard de producción:** https://dashboard-agentes-kappa.vercel.app
+- **Vercel Project:** https://vercel.com/joaquins-projects-f3711830/dashboard-agentes
+
+### Endpoints Implementados:
+- OAuth inicio: `GET /api/auth/instagram`
+- OAuth callback: `GET /api/auth/instagram/callback`
+- Dashboard conexiones: `GET /dashboard/conexiones`
+
+### Permisos Solicitados:
+```javascript
+'public_profile',              // Perfil básico
+'email',                       // Email del usuario
+'pages_read_engagement',       // Leer engagement de páginas
+'pages_manage_engagement',     // Gestionar engagement
+'read_insights',              // Leer métricas
+'instagram_basic',            // Instagram básico
+'instagram_manage_insights'   // Insights de Instagram
+```
+
+---
+
+**Última actualización:** 1 de noviembre, 2025
+**Estado:** ✅ Desplegado y funcionando en producción
+**Production URL:** https://dashboard-agentes-kappa.vercel.app

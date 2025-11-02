@@ -198,7 +198,7 @@ export function AgentsTable({ agents, type }: AgentsTableProps) {
               size="sm"
               onClick={(e) => {
                 e.stopPropagation()
-                router.push(`/dashboard/agentes/${agent.id}`)
+                router.push(`/admin-panel/agentes/${agent.id}`)
               }}
               className="h-8 text-xs hover:bg-primary/10 hover:text-primary"
             >
@@ -377,7 +377,7 @@ export function AgentsTable({ agents, type }: AgentsTableProps) {
               size="sm"
               onClick={(e) => {
                 e.stopPropagation()
-                router.push(`/dashboard/agentes/${agent.id}`)
+                router.push(`/admin-panel/agentes/${agent.id}`)
               }}
               className="h-8 text-xs hover:bg-primary/10 hover:text-primary"
             >
@@ -416,19 +416,19 @@ export function AgentsTable({ agents, type }: AgentsTableProps) {
   })
 
   return (
-    <div className="w-full space-y-4">
-      <div className="flex items-center gap-4">
+    <div className="w-full space-y-3 sm:space-y-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
         <Input
           placeholder="Buscar por nombre..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm border-border/50 shadow-sm"
+          className="w-full sm:max-w-sm border-border/50 shadow-sm text-sm"
         />
 
         <Select value={timeFilter} onValueChange={(value) => setTimeFilter(value as "dia" | "semana" | "mes" | "año")}>
-          <SelectTrigger className="ml-auto w-[140px] h-9 border-border/50 shadow-sm">
+          <SelectTrigger className="sm:ml-auto w-full sm:w-[140px] h-9 border-border/50 shadow-sm text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -441,67 +441,69 @@ export function AgentsTable({ agents, type }: AgentsTableProps) {
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border/50 shadow-sm">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id} className="text-xs sm:text-sm whitespace-nowrap">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    )
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No se encontraron agentes.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="text-xs sm:text-sm">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-xs sm:text-sm"
+                  >
+                    No se encontraron agentes.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+        <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
           Mostrando {table.getRowModel().rows.length} de {agents.length} agentes
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 order-1 sm:order-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="border-border/50 shadow-sm"
+            className="border-border/50 shadow-sm text-xs sm:text-sm h-8"
           >
             Anterior
           </Button>
@@ -510,7 +512,7 @@ export function AgentsTable({ agents, type }: AgentsTableProps) {
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="border-border/50 shadow-sm"
+            className="border-border/50 shadow-sm text-xs sm:text-sm h-8"
           >
             Siguiente
           </Button>
