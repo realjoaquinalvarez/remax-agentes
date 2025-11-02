@@ -144,18 +144,18 @@ export async function GET(request: NextRequest) {
             category: fixEncoding(pageInfoResponse.data.category || ''),
           };
 
-          // Get posts from the last 60 days
-          const sixtyDaysAgo = new Date();
-          sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-          sixtyDaysAgo.setHours(0, 0, 0, 0);
-          const sixtyDaysTimestamp = Math.floor(sixtyDaysAgo.getTime() / 1000);
+          // Get posts from the last 30 days
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          thirtyDaysAgo.setHours(0, 0, 0, 0);
+          const thirtyDaysTimestamp = Math.floor(thirtyDaysAgo.getTime() / 1000);
 
-          console.log(`   📅 Buscando posts desde: ${sixtyDaysAgo.toISOString()}`);
+          console.log(`   📅 Buscando posts desde: ${thirtyDaysAgo.toISOString()}`);
 
           const postsResponse = await axios.get(`https://graph.facebook.com/v23.0/${page.id}/posts`, {
             params: {
               fields: 'id,message,created_time,permalink_url,call_to_action,likes.summary(true),comments.summary(true),shares,reactions.summary(true)',
-              since: sixtyDaysTimestamp,
+              since: thirtyDaysTimestamp,
               access_token: page.access_token,
             },
             headers: {
@@ -164,7 +164,7 @@ export async function GET(request: NextRequest) {
           });
 
           const posts = postsResponse.data.data || [];
-          console.log(`   📄 Posts encontrados en los últimos 60 días: ${posts.length}`);
+          console.log(`   📄 Posts encontrados en los últimos 30 días: ${posts.length}`);
 
           // Get reach for each post
           const postsWithReach = [];
