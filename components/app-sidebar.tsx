@@ -40,6 +40,11 @@ const data = {
   ],
   navMain: [
     {
+      title: "Panel General",
+      url: "/panel-general",
+      icon: IconDashboard,
+    },
+    {
       title: "Agentes",
       url: "/admin-panel/agentes",
       icon: IconUsers,

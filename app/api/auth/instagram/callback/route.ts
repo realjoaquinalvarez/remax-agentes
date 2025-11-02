@@ -26,11 +26,11 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     console.error('Error de autorización:', error);
-    return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/admin-panel/conexiones?error=auth_failed`);
+    return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/panel-general?error=auth_failed`);
   }
 
   if (!code) {
-    return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/admin-panel/conexiones?error=no_code`);
+    return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/panel-general?error=no_code`);
   }
 
   try {
@@ -383,10 +383,10 @@ ${JSON.stringify(dataToStore, null, 2)}
               const dataElement = document.getElementById('fb-data');
               const data = JSON.parse(dataElement.textContent);
               sessionStorage.setItem('facebook_connection_data', JSON.stringify(data));
-              window.location.href = '${process.env.NEXTAUTH_URL}/admin-panel/conexiones?success=connected&pages=${totalPages}&user=${encodeURIComponent(userResponse.data.name)}';
+              window.location.href = '${process.env.NEXTAUTH_URL}/panel-general?success=connected&pages=${totalPages}&user=${encodeURIComponent(userResponse.data.name)}';
             } catch (error) {
               console.error('Error storing data:', error);
-              window.location.href = '${process.env.NEXTAUTH_URL}/admin-panel/conexiones?error=storage_failed';
+              window.location.href = '${process.env.NEXTAUTH_URL}/panel-general?error=storage_failed';
             }
           </script>
         </body>
@@ -417,6 +417,6 @@ ${JSON.stringify(dataToStore, null, 2)}
 
     // URL encode the error detail to pass it safely
     const encodedError = encodeURIComponent(errorDetail);
-    return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/admin-panel/conexiones?error=token_failed&detail=${encodedError}`);
+    return NextResponse.redirect(`${process.env.NEXTAUTH_URL}/panel-general?error=token_failed&detail=${encodedError}`);
   }
 }
