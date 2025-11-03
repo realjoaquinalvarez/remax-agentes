@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart3, Share2 } from "lucide-react"
 import { mockAgents } from "@/lib/data/mock-agents"
 import { AgentsTable } from "@/components/agents-table"
+import { SyncButton } from "@/components/sync-button"
 
 export default function AgentsPage() {
   return (
@@ -40,6 +41,7 @@ export default function AgentsPage() {
               </BreadcrumbList>
             </Breadcrumb>
           }
+          actions={<SyncButton variant="outline" />}
         />
         <div className="flex flex-1 flex-col gap-6 p-6 lg:p-8">
           <div>

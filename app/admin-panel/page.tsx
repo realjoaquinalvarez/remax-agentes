@@ -42,6 +42,7 @@ import {
 import { IconTrendingUp, IconArrowUpRight } from "@tabler/icons-react"
 import { User } from "lucide-react"
 import { mockAgents } from "@/lib/data/mock-agents"
+import { SyncButton } from "@/components/sync-button"
 
 const welcomeMessages = [
   "¡Bienvenido, Jefe! Tu equipo está brillando hoy",
@@ -231,28 +232,31 @@ export default function AdminPanelPage() {
             </Breadcrumb>
           }
           actions={
-            <Select
-              value={timeFilter}
-              onValueChange={(value) => {
-                setTimeFilter(value as typeof timeFilter)
-                // Remove focus after selection
-                setTimeout(() => {
-                  if (document.activeElement instanceof HTMLElement) {
-                    document.activeElement.blur()
-                  }
-                }, 0)
-              }}
-            >
-              <SelectTrigger className="h-8 w-[130px] sm:w-[150px] text-xs focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-border">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="6meses">Últimos 6 meses</SelectItem>
-                <SelectItem value="mes">Último mes</SelectItem>
-                <SelectItem value="semana">Última semana</SelectItem>
-                <SelectItem value="dia">Hoy</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <SyncButton variant="outline" />
+              <Select
+                value={timeFilter}
+                onValueChange={(value) => {
+                  setTimeFilter(value as typeof timeFilter)
+                  // Remove focus after selection
+                  setTimeout(() => {
+                    if (document.activeElement instanceof HTMLElement) {
+                      document.activeElement.blur()
+                    }
+                  }, 0)
+                }}
+              >
+                <SelectTrigger className="h-8 w-[130px] sm:w-[150px] text-xs focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="6meses">Últimos 6 meses</SelectItem>
+                  <SelectItem value="mes">Último mes</SelectItem>
+                  <SelectItem value="semana">Última semana</SelectItem>
+                  <SelectItem value="dia">Hoy</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           }
         />
         <div className="flex flex-1 flex-col gap-4 p-4 sm:gap-6 sm:p-6 lg:gap-8 lg:p-8">
