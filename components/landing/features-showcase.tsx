@@ -200,7 +200,6 @@ export function FeaturesShowcase() {
                 feature={feature}
                 Icon={Icon}
                 isLeft={isLeft}
-                index={index}
               />
             );
           })}

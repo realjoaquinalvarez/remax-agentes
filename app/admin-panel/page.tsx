@@ -194,14 +194,14 @@ export default function AdminPanelPage() {
           label: "Alcance",
           color: "#0b49e9",
         },
-      } satisfies ChartConfig
+      } as ChartConfig
     } else {
       return {
         frecuencia: {
           label: "Publicaciones",
           color: "#7c3aed",
         },
-      } satisfies ChartConfig
+      } as ChartConfig
     }
   }, [chartMetric])
 
