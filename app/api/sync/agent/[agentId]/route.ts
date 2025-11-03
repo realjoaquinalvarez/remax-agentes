@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createSyncJob, startSyncJob, completeSyncJob } from '@/lib/api/sync-logger'
 import { checkRateLimit } from '@/lib/api/rate-limit'
+import { syncAgentMetrics } from '@/lib/facebook/sync-service'
 
 export async function POST(
   request: Request,
@@ -115,20 +116,58 @@ export async function POST(
     // 6. Start sync job
     await startSyncJob(jobId)
 
-    // TODO Phase 2: Implement actual Facebook sync logic for single agent
-    // For now, just complete immediately as a placeholder
+    // 7. Execute sync for the agent
+    let syncResult
+    try {
+      syncResult = await syncAgentMetrics(agentId)
 
-    await completeSyncJob({
-      jobId,
-      status: 'completed',
-    })
+      // 8. Complete sync job with results
+      await completeSyncJob({
+        jobId,
+        status: syncResult.success ? 'completed' : 'failed',
+        agentsProcessed: 1,
+        agentsSucceeded: syncResult.success ? 1 : 0,
+        agentsFailed: syncResult.success ? 0 : 1,
+        apiCallsUsed: syncResult.apiCallsUsed,
+        errorMessage: syncResult.error,
+      })
 
-    return NextResponse.json({
-      success: true,
-      message: 'Sincronización de agente iniciada (placeholder - Phase 2 implementará la lógica real)',
-      jobId,
-      agentId,
-    })
+      if (!syncResult.success) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: syncResult.error || 'Sync failed',
+            jobId,
+            agentId,
+          },
+          { status: 500 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Agente ${syncResult.agentName} sincronizado exitosamente`,
+        jobId,
+        agentId,
+        results: {
+          agentName: syncResult.agentName,
+          facebookMetrics: syncResult.facebookMetrics,
+          instagramMetrics: syncResult.instagramMetrics,
+          apiCallsUsed: syncResult.apiCallsUsed,
+        },
+      })
+    } catch (syncError) {
+      // Complete job as failed
+      await completeSyncJob({
+        jobId,
+        status: 'failed',
+        agentsProcessed: 1,
+        agentsFailed: 1,
+        errorMessage: syncError instanceof Error ? syncError.message : 'Unknown sync error',
+      })
+
+      throw syncError
+    }
   } catch (error) {
     console.error('Error in sync agent:', error)
 

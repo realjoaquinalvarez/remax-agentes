@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { canSyncNow, createSyncJob, startSyncJob, completeSyncJob } from '@/lib/api/sync-logger'
 import { checkRateLimit } from '@/lib/api/rate-limit'
+import { syncAllAgents } from '@/lib/facebook/sync-service'
 
 export async function POST(request: Request) {
   try {
@@ -81,19 +82,43 @@ export async function POST(request: Request) {
     // 5. Start sync job
     await startSyncJob(jobId)
 
-    // TODO Phase 2: Implement actual Facebook sync logic here
-    // For now, just complete immediately as a placeholder
+    // 6. Execute sync for all agents
+    let syncResults
+    try {
+      syncResults = await syncAllAgents()
 
-    await completeSyncJob({
-      jobId,
-      status: 'completed',
-    })
+      // 7. Complete sync job with results
+      await completeSyncJob({
+        jobId,
+        status: syncResults.failedSyncs === 0 ? 'completed' : 'completed_with_errors',
+        agentsProcessed: syncResults.totalAgents,
+        agentsSucceeded: syncResults.successfulSyncs,
+        agentsFailed: syncResults.failedSyncs,
+        apiCallsUsed: syncResults.totalApiCalls,
+      })
 
-    return NextResponse.json({
-      success: true,
-      message: 'Sincronización iniciada (placeholder - Phase 2 implementará la lógica real)',
-      jobId,
-    })
+      return NextResponse.json({
+        success: true,
+        message: `Sincronización completada: ${syncResults.successfulSyncs}/${syncResults.totalAgents} agentes sincronizados exitosamente`,
+        jobId,
+        results: {
+          totalAgents: syncResults.totalAgents,
+          successfulSyncs: syncResults.successfulSyncs,
+          failedSyncs: syncResults.failedSyncs,
+          totalApiCalls: syncResults.totalApiCalls,
+          details: syncResults.results,
+        },
+      })
+    } catch (syncError) {
+      // Complete job as failed
+      await completeSyncJob({
+        jobId,
+        status: 'failed',
+        errorMessage: syncError instanceof Error ? syncError.message : 'Unknown sync error',
+      })
+
+      throw syncError
+    }
   } catch (error) {
     console.error('Error in sync all:', error)
 
