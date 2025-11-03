@@ -199,12 +199,12 @@ function ConexionesContent() {
                 <div className="flex gap-2">
                   <Button
                     onClick={() => {
-                      window.location.href = '/api/auth/instagram';
+                      window.location.href = '/api/auth/facebook/connect';
                     }}
                     className="gap-2 flex-1"
                   >
                     <Link2 className="size-4" />
-                    Conectar
+                    Conectar con Facebook
                   </Button>
                   <Button
                     variant="outline"

@@ -6,6 +6,7 @@ export interface PeriodMetrics {
   impressions: number
   engagementRate: number
   totalEngagements: number
+  linkClicks?: number // Clicks on links including WhatsApp
   leads?: number
 }
 

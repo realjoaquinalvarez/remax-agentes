@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import {
   ChartConfig,
@@ -41,40 +42,98 @@ import {
 import { IconTrendingUp, IconArrowUpRight } from "@tabler/icons-react"
 import { User } from "lucide-react"
 import { mockAgents } from "@/lib/data/mock-agents"
+import { SyncButton } from "@/components/sync-button"
+
+const welcomeMessages = [
+  "¡Bienvenido, Jefe! Tu equipo está brillando hoy",
+  "¡Hola, Líder! Mira todo lo que has construido",
+  "¡Bienvenido de vuelta! Tu equipo sigue rompiendo récords",
+  "¡Qué bueno verte, Jefe! Aquí están tus números ganadores",
+  "¡Bienvenido! Tu liderazgo está dando grandes frutos",
+  "¡Hola, Jefe! Prepárate para ver resultados impresionantes",
+  "¡De vuelta al comando! Tu equipo está imparable",
+  "¡Bienvenido, Líder! Las cifras hablan por sí solas",
+]
 
 export default function AdminPanelPage() {
   const router = useRouter()
   const [topPerformersFilter, setTopPerformersFilter] = React.useState<"dia" | "semana" | "mes" | "año">("mes")
+  const [timeFilter, setTimeFilter] = React.useState<"6meses" | "mes" | "semana" | "dia">("mes")
+  const [chartMetric, setChartMetric] = React.useState<"alcance" | "publicaciones">("alcance")
+  const [welcomeMessage] = React.useState(() =>
+    welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)]
+  )
+  const [isLoaded, setIsLoaded] = React.useState(false)
 
-  // Calculate summary metrics
-  const totalContacted = mockAgents.reduce((sum, agent) => {
-    return sum + (agent.monthlyMetrics.leads || 0) * 3 // Simulating contacted clients (3x closed)
-  }, 0)
+  React.useEffect(() => {
+    setIsLoaded(true)
+  }, [])
 
-  const totalClosed = mockAgents.reduce((sum, agent) => {
-    return sum + (agent.monthlyMetrics.leads || 0)
-  }, 0)
+  // Time filter multipliers
+  const getTimeMultiplier = () => {
+    const multipliers = {
+      "6meses": 6,
+      "mes": 1,
+      "semana": 0.25,
+      "dia": 0.033,
+    }
+    return multipliers[timeFilter]
+  }
 
-  const totalPosts = mockAgents.reduce((sum, agent) => {
+  const getTimeLabel = (filter: typeof timeFilter) => {
+    const labels = {
+      "6meses": "últimos 6 meses",
+      "mes": "último mes",
+      "semana": "última semana",
+      "dia": "hoy",
+    }
+    return labels[filter]
+  }
+
+  // Calculate summary metrics from Facebook data with time filter
+  const multiplier = getTimeMultiplier()
+
+  const totalPosts = Math.floor(mockAgents.reduce((sum, agent) => {
     return sum + agent.monthlyMetrics.posts
-  }, 0)
+  }, 0) * multiplier)
 
-  const totalReach = mockAgents.reduce((sum, agent) => {
+  const totalImpressions = Math.floor(mockAgents.reduce((sum, agent) => {
+    return sum + agent.monthlyMetrics.impressions
+  }, 0) * multiplier)
+
+  const totalReach = Math.floor(mockAgents.reduce((sum, agent) => {
     return sum + agent.monthlyMetrics.reach
-  }, 0)
+  }, 0) * multiplier)
 
-  // Get time-filtered leads for top performers
-  const getFilteredLeads = (monthlyLeads: number) => {
+  const avgEngagementRate = mockAgents.reduce((sum, agent) => {
+    return sum + agent.monthlyMetrics.engagementRate
+  }, 0) / mockAgents.length
+
+  const totalLinkClicks = Math.floor(mockAgents.reduce((sum, agent) => {
+    return sum + (agent.monthlyMetrics.linkClicks || 0)
+  }, 0) * multiplier)
+
+  // Calculate composite performance score for top performers
+  const calculatePerformanceScore = (agent: typeof mockAgents[0]) => {
+    const metrics = agent.monthlyMetrics
+    // Normalize and weight different metrics
+    const postsScore = metrics.posts * 10
+    const impressionsScore = metrics.impressions / 1000
+    const reachScore = metrics.reach / 500
+    const linkClicksScore = (metrics.linkClicks || 0) * 5
+
+    // Apply time filter multiplier
     const multipliers = {
       dia: 0.033,
       semana: 0.25,
       mes: 1,
       año: 12,
     }
-    return Math.floor(monthlyLeads * multipliers[topPerformersFilter])
+
+    return Math.floor((postsScore + impressionsScore + reachScore + linkClicksScore) * multipliers[topPerformersFilter])
   }
 
-  const getTimeLabel = () => {
+  const getTopPerformersLabel = () => {
     const labels = {
       dia: "hoy",
       semana: "esta semana",
@@ -84,26 +143,68 @@ export default function AdminPanelPage() {
     return labels[topPerformersFilter]
   }
 
-  // Chart data for monthly trends (simulated last 6 months)
-  const chartData = [
-    { month: "Ene", cerrados: 186, publicaciones: 138 },
-    { month: "Feb", cerrados: 198, publicaciones: 145 },
-    { month: "Mar", cerrados: 192, publicaciones: 149 },
-    { month: "Abr", cerrados: 215, publicaciones: 154 },
-    { month: "May", cerrados: 208, publicaciones: 152 },
-    { month: "Jun", cerrados: totalClosed, publicaciones: totalPosts },
-  ]
+  // Chart data based on time filter
+  const getChartData = () => {
+    const baseReach = mockAgents.reduce((sum, agent) => sum + agent.monthlyMetrics.reach, 0)
+    const basePosts = mockAgents.reduce((sum, agent) => sum + agent.monthlyMetrics.posts, 0)
 
-  const chartConfig = {
-    cerrados: {
-      label: "Clientes Cerrados",
-      color: "#0b49e9",
-    },
-    publicaciones: {
-      label: "Publicaciones",
-      color: "#7c3aed",
-    },
-  } satisfies ChartConfig
+    if (timeFilter === "6meses") {
+      return [
+        { period: "Mes 1", alcance: Math.floor(baseReach * 0.7), frecuencia: Math.floor(basePosts * 0.7) },
+        { period: "Mes 2", alcance: Math.floor(baseReach * 0.8), frecuencia: Math.floor(basePosts * 0.8) },
+        { period: "Mes 3", alcance: Math.floor(baseReach * 0.85), frecuencia: Math.floor(basePosts * 0.85) },
+        { period: "Mes 4", alcance: Math.floor(baseReach * 0.9), frecuencia: Math.floor(basePosts * 0.9) },
+        { period: "Mes 5", alcance: Math.floor(baseReach * 0.95), frecuencia: Math.floor(basePosts * 0.95) },
+        { period: "Mes 6", alcance: baseReach, frecuencia: basePosts },
+      ]
+    } else if (timeFilter === "mes") {
+      return [
+        { period: "Sem 1", alcance: Math.floor(baseReach * 0.2), frecuencia: Math.floor(basePosts * 0.2) },
+        { period: "Sem 2", alcance: Math.floor(baseReach * 0.4), frecuencia: Math.floor(basePosts * 0.4) },
+        { period: "Sem 3", alcance: Math.floor(baseReach * 0.7), frecuencia: Math.floor(basePosts * 0.7) },
+        { period: "Sem 4", alcance: baseReach, frecuencia: basePosts },
+      ]
+    } else if (timeFilter === "semana") {
+      return [
+        { period: "Lun", alcance: Math.floor(baseReach * 0.14), frecuencia: Math.floor(basePosts * 0.14) },
+        { period: "Mar", alcance: Math.floor(baseReach * 0.28), frecuencia: Math.floor(basePosts * 0.28) },
+        { period: "Mié", alcance: Math.floor(baseReach * 0.42), frecuencia: Math.floor(basePosts * 0.42) },
+        { period: "Jue", alcance: Math.floor(baseReach * 0.57), frecuencia: Math.floor(basePosts * 0.57) },
+        { period: "Vie", alcance: Math.floor(baseReach * 0.71), frecuencia: Math.floor(basePosts * 0.71) },
+        { period: "Sáb", alcance: Math.floor(baseReach * 0.85), frecuencia: Math.floor(basePosts * 0.85) },
+        { period: "Dom", alcance: Math.floor(baseReach * 0.25), frecuencia: Math.floor(basePosts * 0.25) },
+      ]
+    } else { // dia
+      return [
+        { period: "6AM", alcance: Math.floor(baseReach * 0.033 * 0.1), frecuencia: Math.floor(basePosts * 0.033 * 0.1) },
+        { period: "9AM", alcance: Math.floor(baseReach * 0.033 * 0.3), frecuencia: Math.floor(basePosts * 0.033 * 0.3) },
+        { period: "12PM", alcance: Math.floor(baseReach * 0.033 * 0.5), frecuencia: Math.floor(basePosts * 0.033 * 0.5) },
+        { period: "3PM", alcance: Math.floor(baseReach * 0.033 * 0.7), frecuencia: Math.floor(basePosts * 0.033 * 0.7) },
+        { period: "6PM", alcance: Math.floor(baseReach * 0.033 * 0.9), frecuencia: Math.floor(basePosts * 0.033 * 0.9) },
+        { period: "9PM", alcance: Math.floor(baseReach * 0.033), frecuencia: Math.floor(basePosts * 0.033) },
+      ]
+    }
+  }
+
+  const chartData = getChartData()
+
+  const chartConfig = React.useMemo(() => {
+    if (chartMetric === "alcance") {
+      return {
+        alcance: {
+          label: "Alcance",
+          color: "#0b49e9",
+        },
+      } as ChartConfig
+    } else {
+      return {
+        frecuencia: {
+          label: "Publicaciones",
+          color: "#7c3aed",
+        },
+      } as ChartConfig
+    }
+  }, [chartMetric])
 
   return (
     <SidebarProvider
@@ -121,10 +222,41 @@ export default function AdminPanelPage() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Panel de Administrador</BreadcrumbPage>
+                  <BreadcrumbPage
+                    className={`transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+                  >
+                    {welcomeMessage}
+                  </BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
+          }
+          actions={
+            <div className="flex items-center gap-2">
+              <SyncButton variant="outline" />
+              <Select
+                value={timeFilter}
+                onValueChange={(value) => {
+                  setTimeFilter(value as typeof timeFilter)
+                  // Remove focus after selection
+                  setTimeout(() => {
+                    if (document.activeElement instanceof HTMLElement) {
+                      document.activeElement.blur()
+                    }
+                  }, 0)
+                }}
+              >
+                <SelectTrigger className="h-8 w-[130px] sm:w-[150px] text-xs focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="6meses">Últimos 6 meses</SelectItem>
+                  <SelectItem value="mes">Último mes</SelectItem>
+                  <SelectItem value="semana">Última semana</SelectItem>
+                  <SelectItem value="dia">Hoy</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           }
         />
         <div className="flex flex-1 flex-col gap-4 p-4 sm:gap-6 sm:p-6 lg:gap-8 lg:p-8">
@@ -136,50 +268,12 @@ export default function AdminPanelPage() {
             </p>
           </div>
 
-          {/* Main Metrics */}
-          <div className="grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 sm:gap-3">
+          {/* Main Metrics - Facebook Statistics */}
+          <div className="grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 sm:gap-3">
             <Card className="border-border/50 shadow-sm">
-              <CardContent className="p-3 sm:p-4">
+              <CardContent className="px-3 py-0 sm:px-4 sm:py-0">
                 <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
-                  Clientes Contactados
-                </div>
-                <div className="flex items-baseline justify-between">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">{totalContacted}</div>
-                  <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
-                    <IconArrowUpRight className="size-2.5 sm:size-3" />
-                    15%
-                  </div>
-                </div>
-                <p className="mt-1 sm:mt-1.5 text-[9px] sm:text-[10px] text-muted-foreground">
-                  este mes
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 shadow-sm">
-              <CardContent className="p-3 sm:p-4">
-                <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
-                  Clientes Cerrados
-                </div>
-                <div className="flex items-baseline justify-between">
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
-                    {totalClosed}
-                  </div>
-                  <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
-                    <IconArrowUpRight className="size-2.5 sm:size-3" />
-                    12%
-                  </div>
-                </div>
-                <p className="mt-1 sm:mt-1.5 text-[9px] sm:text-[10px] text-muted-foreground">
-                  este mes
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 shadow-sm">
-              <CardContent className="p-3 sm:p-4">
-                <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
-                  Publicaciones
+                  Total Publicaciones
                 </div>
                 <div className="flex items-baseline justify-between">
                   <div className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">{totalPosts}</div>
@@ -189,13 +283,33 @@ export default function AdminPanelPage() {
                   </div>
                 </div>
                 <p className="mt-1 sm:mt-1.5 text-[9px] sm:text-[10px] text-muted-foreground">
-                  este mes
+                  {getTimeLabel(timeFilter)}
                 </p>
               </CardContent>
             </Card>
 
             <Card className="border-border/50 shadow-sm">
-              <CardContent className="p-3 sm:p-4">
+              <CardContent className="px-3 py-0 sm:px-4 sm:py-0">
+                <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
+                  Impresiones Totales
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
+                    {totalImpressions.toLocaleString()}
+                  </div>
+                  <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                    <IconArrowUpRight className="size-2.5 sm:size-3" />
+                    12%
+                  </div>
+                </div>
+                <p className="mt-1 sm:mt-1.5 text-[9px] sm:text-[10px] text-muted-foreground">
+                  {getTimeLabel(timeFilter)}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 shadow-sm">
+              <CardContent className="px-3 py-0 sm:px-4 sm:py-0">
                 <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
                   Alcance Total
                 </div>
@@ -213,20 +327,67 @@ export default function AdminPanelPage() {
                 </p>
               </CardContent>
             </Card>
+
+            <Card className="border-border/50 shadow-sm">
+              <CardContent className="px-3 py-0 sm:px-4 sm:py-0">
+                <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
+                  Tasa de Engagement
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
+                    {avgEngagementRate.toFixed(1)}%
+                  </div>
+                  <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                    <IconArrowUpRight className="size-2.5 sm:size-3" />
+                    5%
+                  </div>
+                </div>
+                <p className="mt-1 sm:mt-1.5 text-[9px] sm:text-[10px] text-muted-foreground">
+                  promedio general
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/50 shadow-sm">
+              <CardContent className="px-3 py-0 sm:px-4 sm:py-0">
+                <div className="text-[9px] sm:text-[10px] lg:text-[11px] font-medium uppercase tracking-wide text-muted-foreground mb-1 sm:mb-1.5">
+                  Clicks en Links
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
+                    {totalLinkClicks.toLocaleString()}
+                  </div>
+                  <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs font-medium text-emerald-600">
+                    <IconArrowUpRight className="size-2.5 sm:size-3" />
+                    15%
+                  </div>
+                </div>
+                <p className="mt-1 sm:mt-1.5 text-[9px] sm:text-[10px] text-muted-foreground">
+                  incluye WhatsApp
+                </p>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Charts and Top Performers */}
           <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-7">
             <Card className="border-border/50 shadow-sm lg:col-span-4 flex flex-col">
               <CardHeader className="pb-2 sm:pb-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <CardTitle className="text-sm sm:text-base font-semibold truncate">Tendencia Mensual</CardTitle>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="text-sm sm:text-base font-semibold truncate">
+                      {chartMetric === "alcance" ? "Alcance en el Tiempo" : "Frecuencia de Publicación"}
+                    </CardTitle>
                     <CardDescription className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs">
-                      Clientes cerrados y publicaciones últimos 6 meses
+                      {chartMetric === "alcance" ? "Personas alcanzadas" : "Total de publicaciones"} - {getTimeLabel(timeFilter)}
                     </CardDescription>
                   </div>
-                  <IconTrendingUp className="size-3.5 sm:size-4 text-muted-foreground shrink-0" />
+                  <Tabs value={chartMetric} onValueChange={(value) => setChartMetric(value as typeof chartMetric)}>
+                    <TabsList className="h-8">
+                      <TabsTrigger value="alcance" className="text-xs px-3 h-7">Alcance</TabsTrigger>
+                      <TabsTrigger value="publicaciones" className="text-xs px-3 h-7">Publicaciones</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </div>
               </CardHeader>
               <CardContent className="px-1 sm:px-2 lg:px-3 pt-0 pb-4 sm:pb-6 flex-1">
@@ -235,8 +396,8 @@ export default function AdminPanelPage() {
                     accessibilityLayer
                     data={chartData}
                     margin={{
-                      left: 0,
-                      right: 0,
+                      left: 8,
+                      right: 8,
                       top: 10,
                       bottom: 10,
                     }}
@@ -248,7 +409,7 @@ export default function AdminPanelPage() {
                       opacity={0.5}
                     />
                     <XAxis
-                      dataKey="month"
+                      dataKey="period"
                       tickLine={false}
                       axisLine={false}
                       tickMargin={6}
@@ -260,39 +421,20 @@ export default function AdminPanelPage() {
                       axisLine={false}
                       tickMargin={4}
                       tick={{ fontSize: 10 }}
-                      width={28}
+                      width={35}
                       className="text-[9px] sm:text-[10px] lg:text-xs"
                     />
                     <ChartTooltip
                       cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }}
                       content={<ChartTooltipContent className="text-xs" />}
                     />
-                    <ChartLegend content={<ChartLegendContent className="text-xs sm:text-sm" />} />
                     <Line
-                      dataKey="cerrados"
+                      dataKey={chartMetric === "alcance" ? "alcance" : "frecuencia"}
                       type="monotone"
-                      stroke="var(--color-cerrados)"
+                      stroke={chartMetric === "alcance" ? "var(--color-alcance)" : "var(--color-frecuencia)"}
                       strokeWidth={2}
                       dot={{
-                        fill: "var(--color-cerrados)",
-                        strokeWidth: 1.5,
-                        r: 3,
-                        stroke: "hsl(var(--background))",
-                        className: "sm:r-4 lg:r-5"
-                      }}
-                      activeDot={{
-                        r: 5,
-                        strokeWidth: 2,
-                        className: "sm:r-6 lg:r-7"
-                      }}
-                    />
-                    <Line
-                      dataKey="publicaciones"
-                      type="monotone"
-                      stroke="var(--color-publicaciones)"
-                      strokeWidth={2}
-                      dot={{
-                        fill: "var(--color-publicaciones)",
+                        fill: chartMetric === "alcance" ? "var(--color-alcance)" : "var(--color-frecuencia)",
                         strokeWidth: 1.5,
                         r: 3,
                         stroke: "hsl(var(--background))",
@@ -315,7 +457,7 @@ export default function AdminPanelPage() {
                   <div className="min-w-0">
                     <CardTitle className="text-sm sm:text-base font-semibold">Mejores Agentes</CardTitle>
                     <CardDescription className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs">
-                      Clientes conseguidos {getTimeLabel()}
+                      Rendimiento general {getTopPerformersLabel()}
                     </CardDescription>
                   </div>
                   <Select value={topPerformersFilter} onValueChange={(value) => setTopPerformersFilter(value as "dia" | "semana" | "mes" | "año")}>
@@ -335,19 +477,19 @@ export default function AdminPanelPage() {
                 {mockAgents
                   .map((agent) => ({
                     ...agent,
-                    filteredLeads: getFilteredLeads(agent.monthlyMetrics.leads || 0)
+                    performanceScore: calculatePerformanceScore(agent)
                   }))
-                  .sort((a, b) => b.filteredLeads - a.filteredLeads)
+                  .sort((a, b) => b.performanceScore - a.performanceScore)
                   .slice(0, 4)
                   .map((agent) => {
                     const sortedAgents = mockAgents
                       .map((a) => ({
                         ...a,
-                        filteredLeads: getFilteredLeads(a.monthlyMetrics.leads || 0)
+                        performanceScore: calculatePerformanceScore(a)
                       }))
-                      .sort((a, b) => b.filteredLeads - a.filteredLeads)
-                    const maxLeads = sortedAgents[0]?.filteredLeads || 1
-                    const percentage = (agent.filteredLeads / maxLeads) * 100
+                      .sort((a, b) => b.performanceScore - a.performanceScore)
+                    const maxScore = sortedAgents[0]?.performanceScore || 1
+                    const percentage = (agent.performanceScore / maxScore) * 100
 
                     return (
                       <div
@@ -368,13 +510,13 @@ export default function AdminPanelPage() {
                             </p>
                           </div>
 
-                          {/* Client Count */}
+                          {/* Performance Score */}
                           <div className="shrink-0 text-right">
                             <div className="text-base sm:text-lg font-semibold text-primary">
-                              {agent.filteredLeads}
+                              {agent.performanceScore}
                             </div>
                             <div className="text-[8px] sm:text-[9px] font-medium text-muted-foreground">
-                              clientes
+                              puntos
                             </div>
                           </div>
                         </div>

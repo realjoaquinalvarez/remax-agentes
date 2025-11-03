@@ -419,11 +419,11 @@ export default function AgentDetailPage() {
                         <LineChart
                           accessibilityLayer
                           data={performanceHistory}
-                          margin={{ left: 0, right: 0, top: 10, bottom: 10 }}
+                          margin={{ left: 8, right: 8, top: 10, bottom: 10 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
                           <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={6} tick={{ fontSize: 10 }} className="text-[9px] sm:text-[10px]" />
-                          <YAxis tickLine={false} axisLine={false} tickMargin={4} tick={{ fontSize: 10 }} width={28} className="text-[9px] sm:text-[10px]" />
+                          <YAxis tickLine={false} axisLine={false} tickMargin={4} tick={{ fontSize: 10 }} width={35} className="text-[9px] sm:text-[10px]" />
                           <ChartTooltip cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }} content={<ChartTooltipContent className="text-xs" />} />
                           <Line
                             key={`clientes-${clientesMetric}`}
@@ -470,11 +470,11 @@ export default function AgentDetailPage() {
                         <LineChart
                           accessibilityLayer
                           data={contentHistory}
-                          margin={{ left: 0, right: 0, top: 10, bottom: 10 }}
+                          margin={{ left: 8, right: 8, top: 10, bottom: 10 }}
                         >
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
                           <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={6} tick={{ fontSize: 10 }} className="text-[9px] sm:text-[10px]" />
-                          <YAxis tickLine={false} axisLine={false} tickMargin={4} tick={{ fontSize: 10 }} width={28} className="text-[9px] sm:text-[10px]" />
+                          <YAxis tickLine={false} axisLine={false} tickMargin={4} tick={{ fontSize: 10 }} width={35} className="text-[9px] sm:text-[10px]" />
                           <ChartTooltip cursor={{ stroke: "hsl(var(--border))", strokeWidth: 1 }} content={<ChartTooltipContent className="text-xs" />} />
                           <Line
                             key={`contenido-${contenidoMetric}`}

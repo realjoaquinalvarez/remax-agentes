@@ -20,6 +20,7 @@ export const mockAgents: Agent[] = [
       impressions: 48500,
       engagementRate: 7.8,
       totalEngagements: 2496,
+      linkClicks: 342,
       leads: 47,
     },
     weeklyMetrics: {
@@ -74,6 +75,7 @@ export const mockAgents: Agent[] = [
       impressions: 68200,
       engagementRate: 8.4,
       totalEngagements: 3780,
+      linkClicks: 456,
       leads: 52,
     },
     weeklyMetrics: {
@@ -164,6 +166,7 @@ export const mockAgents: Agent[] = [
       impressions: 36800,
       engagementRate: 6.5,
       totalEngagements: 1580,
+      linkClicks: 287,
       leads: 34,
     },
     weeklyMetrics: {
@@ -218,6 +221,7 @@ export const mockAgents: Agent[] = [
       impressions: 58100,
       engagementRate: 7.2,
       totalEngagements: 2772,
+      linkClicks: 398,
       leads: 43,
     },
     weeklyMetrics: {
@@ -272,6 +276,7 @@ export const mockAgents: Agent[] = [
       impressions: 29900,
       engagementRate: 5.8,
       totalEngagements: 1148,
+      linkClicks: 221,
       leads: 28,
     },
     weeklyMetrics: {
@@ -326,6 +331,7 @@ export const mockAgents: Agent[] = [
       impressions: 43400,
       engagementRate: 6.9,
       totalEngagements: 1980,
+      linkClicks: 315,
       leads: 36,
     },
     weeklyMetrics: {

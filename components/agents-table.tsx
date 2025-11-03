@@ -15,8 +15,9 @@ import {
   VisibilityState,
 } from "@tanstack/react-table"
 import { ArrowUpDown, User, TrendingUp, TrendingDown } from "lucide-react"
-import { Agent } from "@/lib/types/agent"
+import { Agent } from "@/hooks/use-agents"
 import { Button } from "@/components/ui/button"
+import { SyncStatusIndicator } from "@/components/data-freshness-badge"
 import { Badge } from "@/components/ui/badge"
 import {
   Select,
