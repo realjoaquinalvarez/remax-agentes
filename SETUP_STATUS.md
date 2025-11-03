@@ -32,88 +32,40 @@
 
 #### **Configuración**
 1. ✅ `.env.example` - Variables de entorno necesarias
-2. ✅ `supabase/README.md` - Guía completa de setup de Supabase
+2. ✅ `.env` - Variables configuradas (no en git)
+3. ✅ `supabase/README.md` - Guía completa de setup de Supabase
 
 ---
 
-## 📋 PRÓXIMOS PASOS PARA TI
+## ✅ SETUP DE SUPABASE COMPLETADO
 
-### 1. Crear Proyecto en Supabase (⏱️ 10 minutos)
+### Base de Datos Configurada
 
-1. Ve a https://supabase.com/dashboard
-2. Click en "New Project"
-3. Completa:
-   - Name: Dashboard Agentes RE/MAX
-   - Database Password: (guárdalo de forma segura)
-   - Region: South America (Sao Paulo) o la más cercana
-   - Plan: Free tier
+**Proyecto ID:** cpfjqaxxtlfzmgnmnqhe
+**URL:** https://cpfjqaxxtlfzmgnmnqhe.supabase.co
 
-4. Espera 2-3 minutos a que se cree el proyecto
+#### Tablas Creadas (4 tablas)
+- ✅ `agents` - 21 columnas, RLS habilitado
+- ✅ `facebook_metrics_daily` - 21 columnas, RLS habilitado
+- ✅ `sync_jobs` - 16 columnas, RLS habilitado
+- ✅ `api_rate_limits` - 8 columnas, RLS habilitado
 
-### 2. Configurar Variables de Entorno (⏱️ 5 minutos)
+#### Funciones SQL Helper (5 funciones)
+- ✅ `can_make_api_calls(calls_needed)` - Verifica presupuesto de API
+- ✅ `increment_api_calls(calls_made_count)` - Incrementa contador de API
+- ✅ `is_admin()` - Verifica si usuario es admin
+- ✅ `get_current_hour_window()` - Obtiene ventana de hora actual
+- ✅ `update_updated_at_column()` - Trigger para updated_at
 
-1. En tu proyecto Supabase, ve a **Settings** → **API**
-2. Copia:
-   - Project URL → `NEXT_PUBLIC_SUPABASE_URL` - https://cpfjqaxxtlfzmgnmnqhe.supabase.co
-   - anon public key → `NEXT_PUBLIC_SUPABASE_ANON_KEY` - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwZmpxYXh4dGxmem1nbm1ucWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxMjgxOTQsImV4cCI6MjA3NzcwNDE5NH0.Z1nDqd36fp83ROYV9GcHjB_vTOOSu-jN6AX19hXGoJg
-   - service_role key → `SUPABASE_SERVICE_ROLE_KEY` - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwZmpxYXh4dGxmem1nbm1ucWhlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MjEyODE5NCwiZXhwIjoyMDc3NzA0MTk0fQ.4WwiIlHg1LerGkHnRVR2U_HHzVGNC5wZAtECWAGgj-E
-   - Secret keys - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwZmpxYXh4dGxmem1nbm1ucWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxMjgxOTQsImV4cCI6MjA3NzcwNDE5NH0.Z1nDqd36fp83ROYV9GcHjB_vTOOSu-jN6AX19hXGoJg 
-   - Project ID - cpfjqaxxtlfzmgnmnqhe
-3. En tu proyecto local:
-   ```bash
-   cp .env.example .env.local
-   ```
+#### Políticas RLS Configuradas
+- ✅ Agentes solo ven sus propios datos
+- ✅ Admins ven todos los datos
+- ✅ Service role puede insertar/actualizar métricas
 
-4. Edita `.env.local` y pega tus valores de Supabase
-
-### 3. Ejecutar Migraciones SQL (⏱️ 10 minutos)
-
-1. En Supabase, ve a **SQL Editor**
-2. Click en "New query"
-3. Copia y pega el contenido de cada archivo en orden:
-   - `supabase/migrations/001_create_agents_table.sql`
-   - `supabase/migrations/002_create_facebook_metrics_table.sql`
-   - `supabase/migrations/003_create_sync_jobs_table.sql`
-   - `supabase/migrations/004_create_api_rate_limits_table.sql`
-   - `supabase/migrations/005_create_rls_policies.sql`
-
-4. Para cada uno, click en **Run**
-
-### 4. Crear Usuario Admin (⏱️ 5 minutos)
-
-1. En Supabase, ve a **Authentication** → **Users**
-2. Click en "Add user" → "Create new user"
-3. Completa:
-   - Email: `tu-email@remax.com`
-   - Password: `tu-password-seguro`
-   - Auto Confirm User: ✅ **ACTIVADO**
-
-4. Una vez creado, click en el usuario
-5. En **User Metadata**, click en el botón de edición
-6. Agrega:
-   ```json
-   {
-     "role": "admin"
-   }
-   ```
-
-7. Click en **Save**
-
-### 5. Verificar Instalación (⏱️ 2 minutos)
-
-1. Reinicia tu servidor de desarrollo:
-   ```bash
-   npm run dev
-   ```
-
-2. Verifica que no haya errores de compilación
-
-3. Ve a **Table Editor** en Supabase
-4. Deberías ver 4 tablas:
-   - agents
-   - facebook_metrics_daily
-   - sync_jobs
-   - api_rate_limits
+#### Variables de Entorno Configuradas
+- ✅ `NEXT_PUBLIC_SUPABASE_URL`
+- ✅ `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- ✅ `SUPABASE_SERVICE_ROLE_KEY`
 
 ---
 
@@ -125,6 +77,7 @@
    - Tablas para agentes, métricas, sync jobs, rate limits
    - Row Level Security configurado
    - Funciones helper SQL para rate limiting
+   - Índices para performance
 
 2. **API Routes Funcionales**
    - `GET /api/sync/status` - Estado de sincronización
@@ -143,6 +96,11 @@
    - Funciones helper para verificar límites
    - Throttling de 12 horas entre syncs completos
    - Throttling de 30 minutos por agente individual
+
+5. **Build Exitoso**
+   - ✅ Compilación TypeScript sin errores
+   - ✅ Solo warnings de ESLint (no críticos)
+   - ✅ Listo para desarrollo
 
 ---
 
@@ -178,33 +136,26 @@
 
 ---
 
-## 🔍 Verificar que Todo Funcione
+## 🧪 Verificación del Setup
 
-### Test 1: Verificar Cliente de Supabase
+### Test de Conexión a Supabase
 
-Crea un archivo temporal `test-supabase.ts`:
+Puedes probar la conexión ejecutando esto en la consola del navegador en tu app:
 
-```typescript
-import { createClient } from '@/lib/supabase/client'
-
-async function test() {
-  const supabase = createClient()
-
-  const { data, error } = await supabase
-    .from('agents')
-    .select('count')
-
-  console.log('✅ Conexión exitosa:', data, error)
-}
-
-test()
+```javascript
+// En DevTools Console
+const { createClient } = await import('@supabase/supabase-js')
+const supabase = createClient(
+  'https://cpfjqaxxtlfzmgnmnqhe.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwZmpxYXh4dGxmem1nbm1ucWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxMjgxOTQsImV4cCI6MjA3NzcwNDE5NH0.Z1nDqd36fp83ROYV9GcHjB_vTOOSu-jN6AX19hXGoJg'
+)
+const { data, error } = await supabase.from('agents').select('count')
+console.log('✅ Conexión exitosa:', data, error)
 ```
 
-### Test 2: Probar API Routes
+### Test de API Routes
 
 ```bash
-# En otra terminal, con el servidor corriendo:
-
 # Test rate limit status
 curl http://localhost:3000/api/sync/rate-limit
 
@@ -212,7 +163,24 @@ curl http://localhost:3000/api/sync/rate-limit
 curl http://localhost:3000/api/sync/status
 ```
 
-Deberías recibir respuestas JSON válidas.
+---
+
+## 💰 Recordatorio de Costos
+
+**TOTAL: $0/mes** ✅
+
+- Supabase Free tier: $0
+  - 500MB database storage
+  - 50,000 monthly active users
+  - 2GB egress bandwidth
+- Vercel Hobby: $0
+- Sin cron jobs
+- Actualización manual diaria
+
+**Uso Actual:**
+- 4 tablas con 0 filas: ~0KB
+- 5 funciones SQL helper
+- API budget: 1,500-2,100 llamadas/mes (1-2% utilización)
 
 ---
 
@@ -225,38 +193,31 @@ Deberías recibir respuestas JSON válidas.
 
 ---
 
-## 💰 Recordatorio de Costos
-
-**TOTAL: $0/mes** ✅
-
-- Supabase Free tier: $0
-- Vercel Hobby: $0
-- Sin cron jobs
-- Actualización manual diaria
-
----
-
-## 🆘 ¿Problemas?
-
-### Error: "relation does not exist"
-→ No ejecutaste las migraciones SQL. Ve al paso 3.
-
-### Error: "Invalid JWT"
-→ Verifica las variables de entorno en `.env.local`
-
-### Error: "Forbidden"
-→ Tu usuario no tiene `role: "admin"` en metadata
-
-### No veo datos en tablas
-→ Normal, aún no hay datos. Fase 2 agregará la lógica de sync.
-
----
-
 ## 🎉 Estado Actual
 
 ✅ **Fase 1: COMPLETADA (100%)**
+   - Base de datos configurada
+   - Migraciones ejecutadas
+   - Variables de entorno configuradas
+   - API routes creadas
+   - Build exitoso
+
 ⏸️ **Fase 2-6: Pendientes**
+   - Integración con Facebook API
+   - UI de sincronización
+   - Optimizaciones
+   - Testing y deployment
 
-**Siguiente paso:** Ejecutar el setup de Supabase siguiendo los pasos de arriba.
+---
 
-Una vez completado el setup, estarás listo para que continuemos con **Fase 2: Integración con Facebook API**.
+## 🚀 Siguiente Paso
+
+**Fase 2: Facebook Graph API Integration**
+
+La infraestructura está lista. El próximo paso es implementar la lógica real de sincronización con la API de Facebook para obtener las métricas de los agentes.
+
+Cuando estés listo, podemos comenzar con:
+1. Crear el módulo de integración con Facebook Graph API
+2. Implementar la lógica de obtención de métricas
+3. Guardar datos en Supabase
+4. Agregar el botón de sincronización en el UI
